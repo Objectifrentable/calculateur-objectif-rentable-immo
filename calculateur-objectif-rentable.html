@@ -1,0 +1,3020 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur de Rentabilité — Objectif Rentable</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ──────────────────────────────────────
+   VARIABLES
+────────────────────────────────────── */
+:root {
+  --vert:     #1fa04a;
+  --vert-f:   #156e33;
+  --vert-xl:  #e8f7ed;
+  --bleu:     #1678b4;
+  --bleu-f:   #0e5a8a;
+  --bleu-xl:  #e4f1fb;
+  --rouge:    #dc2626;
+  --rouge-xl: #fee2e2;
+  --fond:     #f0f4f1;
+  --card:     #ffffff;
+  --texte:    #1a2319;
+  --muted:    #5c6e5f;
+  --border:   #dde5de;
+  --r:        12px;
+  --shadow:   0 2px 16px rgba(0,0,0,.07);
+}
+
+/* ──────────────────────────────────────
+   RESET & BASE
+────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--fond);
+  color: var(--texte);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ──────────────────────────────────────
+   HEADER
+────────────────────────────────────── */
+header {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,.06);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+  gap: 1.5rem;
+}
+
+/* Logo SVG intégré */
+.logo-wrap { display: flex; align-items: center; gap: .7rem; flex-shrink: 0; }
+.logo-text-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.logo-name {
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: -.01em;
+  color: var(--texte);
+}
+.logo-sub {
+  font-size: .65rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.header-title {
+  font-size: .82rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.header-badge {
+  background: var(--vert-xl);
+  color: var(--vert-f);
+  font-size: .68rem;
+  font-weight: 700;
+  padding: .2rem .7rem;
+  border-radius: 50px;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+/* ──────────────────────────────────────
+   LAYOUT
+────────────────────────────────────── */
+.page { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+
+/* Grille principale : gauche inputs | droite résultats */
+.main-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+@media(max-width:900px){ .main-grid { grid-template-columns: 1fr; } }
+
+/* ──────────────────────────────────────
+   CARDS
+────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .9rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(248,250,248,1));
+}
+.card-head-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+  flex-shrink: 0;
+}
+.card-head h3 {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--texte);
+  letter-spacing: .01em;
+}
+.card-head p {
+  font-size: .7rem;
+  color: var(--muted);
+  margin-top: .1rem;
+}
+.card-body { padding: 1rem 1.2rem; }
+
+/* ──────────────────────────────────────
+   FORM ELEMENTS
+────────────────────────────────────── */
+.field { margin-bottom: .75rem; }
+.field:last-child { margin-bottom: 0; }
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .6rem;
+}
+
+label {
+  display: block;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: .25rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.label-hint {
+  display: inline-flex;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  align-items: center;
+  justify-content: center;
+  font-size: .6rem;
+  color: var(--muted);
+  cursor: help;
+  margin-left: .3rem;
+  font-weight: 700;
+}
+
+input[type=number], select {
+  width: 100%;
+  padding: .5rem .75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  color: var(--texte);
+  font-size: .85rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input[type=number]:focus, select:focus {
+  border-color: var(--vert);
+  box-shadow: 0 0 0 3px rgba(31,160,74,.12);
+}
+input[type=number] { text-align: right; font-weight: 600; }
+
+.input-group { position: relative; }
+.input-suffix {
+  position: absolute;
+  right: .75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: .75rem;
+  color: var(--muted);
+  font-weight: 600;
+  pointer-events: none;
+}
+.input-group input { padding-right: 2.5rem; }
+
+.section-sep {
+  height: 1px;
+  background: var(--border);
+  margin: .9rem 0;
+}
+.section-label {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: .6rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Fiscal tabs */
+.fiscal-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .4rem;
+  margin-bottom: .75rem;
+}
+.ftab {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: .45rem .6rem;
+  cursor: pointer;
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: white;
+  transition: all .15s;
+  line-height: 1.3;
+}
+.ftab:hover { border-color: var(--vert); color: var(--vert); }
+.ftab.active {
+  border-color: var(--vert);
+  background: var(--vert-xl);
+  color: var(--vert-f);
+}
+.ftab .ftab-sub {
+  font-size: .62rem;
+  font-weight: 400;
+  opacity: .7;
+  display: block;
+  margin-top: .1rem;
+}
+
+/* Btn calculer */
+.btn-calc {
+  width: 100%;
+  padding: .85rem;
+  background: linear-gradient(135deg, var(--vert), #15803d);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s, transform .1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: .9rem;
+  letter-spacing: .01em;
+  box-shadow: 0 3px 12px rgba(31,160,74,.3);
+}
+.btn-calc:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn-calc:active { transform: translateY(0); }
+
+/* ──────────────────────────────────────
+   RÉSULTATS : DASHBOARD
+────────────────────────────────────── */
+.results-col { display: flex; flex-direction: column; gap: 1.2rem; }
+
+/* Dashboard principal */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dash-card {
+  border-radius: var(--r);
+  padding: 1.2rem 1.4rem;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  transition: all .3s;
+}
+.dash-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .07;
+  border-radius: var(--r);
+}
+.dash-card.positif {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.dash-card.positif::before { background: var(--vert); }
+.dash-card.negatif {
+  background: #fff1f1;
+  border-color: #fca5a5;
+}
+.dash-card.negatif::before { background: var(--rouge); }
+.dash-card.neutre {
+  background: var(--fond);
+  border-color: var(--border);
+}
+
+.dash-label {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: .4rem;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.dash-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: .3rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+.dash-card.positif .dash-value { color: var(--vert-f); }
+.dash-card.negatif .dash-value { color: var(--rouge); }
+.dash-card.neutre .dash-value { color: var(--texte); }
+
+.dash-sub {
+  font-size: .72rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.dash-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: .2rem .6rem;
+  border-radius: 50px;
+  margin-top: .5rem;
+}
+.dash-verdict.v-positif { background: #dcfce7; color: #15803d; }
+.dash-verdict.v-negatif { background: #fee2e2; color: var(--rouge); }
+.dash-verdict.v-neutre  { background: var(--fond); color: var(--muted); }
+
+/* KPIs secondaires */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .7rem;
+}
+@media(max-width:700px){ .kpi-row { grid-template-columns: 1fr 1fr; } }
+
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .85rem 1rem;
+}
+.kpi-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: .3rem; }
+.kpi-value { font-size: 1.15rem; font-weight: 800; color: var(--texte); font-variant-numeric: tabular-nums; }
+.kpi-value.vert { color: var(--vert-f); }
+.kpi-value.rouge { color: var(--rouge); }
+.kpi-value.bleu  { color: var(--bleu-f); }
+.kpi-sub { font-size: .65rem; color: var(--muted); margin-top: .1rem; }
+
+/* ──────────────────────────────────────
+   GRAPHIQUES
+────────────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media(max-width:640px){ .charts-grid { grid-template-columns: 1fr; } }
+
+.chart-wrap {
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chart-zero {
+  font-size: .7rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: .5rem;
+  padding: .3rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+
+/* ──────────────────────────────────────
+   DÉTAIL FISCAL
+────────────────────────────────────── */
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table tr { border-bottom: 1px solid var(--border); }
+.detail-table tr:last-child { border-bottom: none; }
+.detail-table td {
+  padding: .5rem .6rem;
+  font-size: .8rem;
+}
+.detail-table td:first-child { color: var(--muted); }
+.detail-table td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.detail-table tr.total td {
+  font-weight: 800;
+  font-size: .85rem;
+  color: var(--texte);
+  border-top: 2px solid var(--border);
+  padding-top: .7rem;
+}
+.detail-table tr.positif td:last-child { color: var(--vert-f); }
+.detail-table tr.negatif td:last-child { color: var(--rouge); }
+
+/* ──────────────────────────────────────
+   ÉTAT VIDE
+────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--muted);
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.empty-title { font-size: .9rem; font-weight: 700; margin-bottom: .4rem; color: var(--texte); }
+.empty-sub { font-size: .78rem; line-height: 1.6; }
+
+/* Tooltip personnalisé */
+.tooltip-note {
+  background: var(--fond);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .6rem .9rem;
+  font-size: .72rem;
+  color: var(--muted);
+  margin-top: .6rem;
+  line-height: 1.5;
+}
+.tooltip-note strong { color: var(--texte); }
+
+/* Résumé fiscal responsive */
+.fiscal-note {
+  background: var(--bleu-xl);
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: .7rem 1rem;
+  font-size: .75rem;
+  color: var(--bleu-f);
+  line-height: 1.5;
+  margin-top: .4rem;
+}
+.fiscal-note strong { font-weight: 700; }
+
+/* Mobile stack */
+@media(max-width:640px){
+  .dashboard { grid-template-columns: 1fr; }
+  .header-title { display: none; }
+  .page { padding: 1rem .75rem 2rem; }
+}
+
+/* ─────────────────────────
+   ENTRETIEN TYPE TABS
+───────────────────────── */
+.entretien-type-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: .3rem;
+}
+.etab {
+  background: var(--fond);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: .35rem .3rem;
+  font-size: .7rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--texte);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  text-align: center;
+}
+.etab span { font-size: .62rem; font-weight: 500; color: var(--muted); }
+.etab:hover { border-color: var(--vert); background: var(--vert-xl); }
+.etab.active {
+  background: var(--vert-xl);
+  border-color: var(--vert);
+  color: var(--vert-f);
+}
+.etab.active span { color: var(--vert-f); }
+
+/* ─────────────────────────
+   VERDICT BANNER (top résultats)
+───────────────────────── */
+.verdict-banner {
+  border-radius: 16px;
+  padding: 1.6rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  position: relative;
+  overflow: hidden;
+}
+.verdict-banner.rentable {
+  background: linear-gradient(135deg, #071f10 0%, #0c2b1a 100%);
+  border: 2px solid rgba(74,222,128,.5);
+  box-shadow: 0 0 40px rgba(31,160,74,.15);
+}
+.verdict-banner.nonrentable {
+  background: linear-gradient(135deg, #1f0707 0%, #2b0c0c 100%);
+  border: 2px solid rgba(248,113,113,.4);
+  box-shadow: 0 0 40px rgba(220,38,38,.12);
+}
+/* État intermédiaire : rendement ≥ 6% mais cashflow négatif → rouge aussi comme demandé */
+.verdict-banner.peurentable {
+  background: linear-gradient(135deg, #1f0b00 0%, #2b1200 100%);
+  border: 2px solid rgba(251,146,60,.45);
+  box-shadow: 0 0 40px rgba(234,88,12,.12);
+}
+.verdict-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.verdict-emoji { font-size: 1.8rem; position: relative; z-index: 1; }
+.verdict-label {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+.verdict-banner.rentable .verdict-label { color: rgba(74,222,128,.7); }
+.verdict-banner.nonrentable .verdict-label { color: rgba(248,113,113,.7); }
+.verdict-pct-big {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.04em;
+  position: relative;
+  z-index: 1;
+}
+.verdict-banner.rentable .verdict-pct-big { color: #4ade80; }
+.verdict-banner.nonrentable .verdict-pct-big { color: #f87171; }
+.verdict-main-text {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  position: relative;
+  z-index: 1;
+}
+.verdict-banner.rentable .verdict-main-text { color: #86efac; }
+.verdict-banner.nonrentable .verdict-main-text { color: #fca5a5; }
+.verdict-sub-text {
+  font-size: .78rem;
+  color: rgba(255,255,255,.5);
+  line-height: 1.5;
+  max-width: 360px;
+  position: relative;
+  z-index: 1;
+}
+.verdict-threshold {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .7rem;
+  font-weight: 600;
+  padding: .2rem .7rem;
+  border-radius: 50px;
+  margin-top: .2rem;
+  position: relative;
+  z-index: 1;
+}
+.verdict-banner.rentable .verdict-threshold {
+  background: rgba(74,222,128,.12);
+  border: 1px solid rgba(74,222,128,.25);
+  color: #86efac;
+}
+.verdict-banner.nonrentable .verdict-threshold {
+  background: rgba(248,113,113,.1);
+  border: 1px solid rgba(248,113,113,.2);
+  color: #fca5a5;
+}
+/* PEU RENTABLE — orange ambré : yield ≥ 6% mais cashflow négatif */
+.verdict-banner.peurentable .verdict-pct-big   { color: #fb923c; }
+.verdict-banner.peurentable .verdict-main-text { color: #fdba74; }
+.verdict-banner.peurentable .verdict-label     { color: rgba(251,146,60,.7); }
+.verdict-banner.peurentable .verdict-threshold {
+  background: rgba(251,146,60,.1);
+  border: 1px solid rgba(251,146,60,.25);
+  color: #fdba74;
+}
+
+/* ─────────────────────────
+   BOUTONS ACTION
+───────────────────────── */
+.action-btns {
+  display: flex;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+.btn-copy {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  background: white;
+  color: var(--texte);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  font-size: .83rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.btn-copy:hover { border-color: var(--bleu); background: var(--bleu-xl); }
+.btn-optim {
+  flex: 1.4;
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  background: linear-gradient(135deg, var(--vert), var(--bleu));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  font-size: .83rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  white-space: nowrap;
+}
+.btn-optim:hover { opacity: .88; transform: translateY(-1px); }
+
+/* ─────────────────────────
+   MODAL COPIER / COLLER
+───────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 400;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+}
+.modal-head {
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-head h4 { font-size: .95rem; font-weight: 700; }
+.modal-close {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--fond);
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.modal-close:hover { background: #e5e7eb; }
+.modal-body { padding: 1.4rem; }
+.modal-tabs {
+  display: flex;
+  gap: .4rem;
+  margin-bottom: 1rem;
+}
+.mtab {
+  flex: 1;
+  padding: .45rem .5rem;
+  text-align: center;
+  font-size: .8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--fond);
+  border: 1.5px solid var(--border);
+  transition: all .15s;
+  font-family: inherit;
+}
+.mtab.active { background: var(--vert-xl); border-color: var(--vert); color: var(--vert-f); }
+.modal-tab-content { display: none; }
+.modal-tab-content.active { display: block; }
+.modal-textarea {
+  width: 100%;
+  height: 190px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem;
+  font-size: .75rem;
+  font-family: monospace;
+  resize: vertical;
+  outline: none;
+  color: var(--texte);
+  background: var(--fond);
+  line-height: 1.6;
+}
+.modal-textarea:focus { border-color: var(--vert); }
+.modal-note {
+  font-size: .75rem;
+  color: var(--muted);
+  margin-bottom: .7rem;
+  line-height: 1.55;
+}
+.modal-actions {
+  display: flex;
+  gap: .6rem;
+  margin-top: .8rem;
+}
+.btn-modal-primary {
+  flex: 1;
+  padding: .65rem 1rem;
+  background: var(--vert);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+.btn-modal-primary:hover { background: var(--vert-f); }
+.btn-modal-secondary {
+  flex: 1;
+  padding: .65rem 1rem;
+  background: white;
+  color: var(--texte);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .15s;
+}
+.btn-modal-secondary:hover { border-color: var(--texte); }
+.copy-confirm {
+  font-size: .8rem;
+  color: var(--vert-f);
+  font-weight: 600;
+  text-align: center;
+  margin-top: .5rem;
+  height: 1.2rem;
+}
+
+/* ─────────────────────────
+   VOLET OPTIMISATION FISCALE
+───────────────────────── */
+.optim-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.3);
+  z-index: 299;
+}
+.optim-overlay.open { display: block; }
+
+.optim-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 500px;
+  background: white;
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 48px rgba(0,0,0,.2);
+  z-index: 300;
+  transform: translateX(100%);
+  transition: transform .35s cubic-bezier(.25,.46,.45,.94);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.optim-panel.open { transform: translateX(0); }
+@media(max-width:600px){ .optim-panel { width: 100%; } }
+
+.optim-head {
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0d3320, #0e2535);
+  color: white;
+}
+.optim-head-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.optim-head-text h4 { font-size: 1rem; font-weight: 700; color: #4ade80; }
+.optim-head-text p  { font-size: .74rem; color: rgba(255,255,255,.65); margin-top: .1rem; }
+.optim-head-close {
+  margin-left: auto;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.optim-head-close:hover { background: rgba(255,255,255,.25); }
+
+.optim-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* Questions du volet */
+.optim-section-title {
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin-bottom: .6rem;
+}
+.optim-choices {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+.optim-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  padding: .7rem .9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.optim-choice:hover { border-color: var(--vert); background: var(--vert-xl); }
+.optim-choice.selected { border-color: var(--vert); background: var(--vert-xl); }
+.optim-choice input[type="radio"] { margin-top: .2rem; accent-color: var(--vert); flex-shrink: 0; }
+.optim-choice-title { font-size: .85rem; font-weight: 600; color: var(--texte); }
+.optim-choice-desc  { font-size: .73rem; color: var(--muted); margin-top: .1rem; line-height: 1.45; }
+.btn-run-optim {
+  width: 100%;
+  padding: .85rem;
+  background: linear-gradient(135deg, var(--vert), var(--bleu));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.btn-run-optim:hover { opacity: .88; }
+
+/* Résultats comparatifs */
+.optim-results { display: none; flex-direction: column; gap: .75rem; }
+.optim-results.show { display: flex; }
+
+.optim-reco-box {
+  background: linear-gradient(135deg, #0d3320, #0e2535);
+  border-radius: 12px;
+  padding: 1.2rem;
+  color: white;
+}
+.optim-reco-box h5 {
+  font-size: .9rem;
+  font-weight: 700;
+  color: #4ade80;
+  margin-bottom: .5rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.optim-reco-box p {
+  font-size: .8rem;
+  color: rgba(255,255,255,.8);
+  line-height: 1.7;
+}
+.optim-reco-box strong { color: #fff; }
+
+.optim-regime-card {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.optim-regime-card.winner {
+  border-color: var(--vert);
+  box-shadow: 0 0 0 3px rgba(31,160,74,.1);
+}
+.optim-regime-card.excluded { opacity: .5; }
+.optim-regime-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .65rem 1rem;
+  background: var(--fond);
+  border-bottom: 1px solid var(--border);
+}
+.optim-regime-card.winner .optim-regime-head {
+  background: var(--vert-xl);
+  border-color: rgba(31,160,74,.2);
+}
+.optim-regime-name {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--texte);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.optim-rank-badge {
+  width: 20px; height: 20px;
+  background: var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .64rem;
+  font-weight: 800;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.optim-regime-card.winner .optim-rank-badge { background: var(--vert); color: white; }
+.optim-regime-cf { font-size: 1.05rem; font-weight: 800; color: var(--vert-f); }
+.optim-regime-cf.neg { color: var(--rouge); }
+.optim-regime-body { padding: .65rem 1rem; }
+.optim-regime-kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: .4rem;
+  font-size: .72rem;
+  margin-bottom: .5rem;
+}
+.ok-lbl { color: var(--muted); font-size: .63rem; text-transform: uppercase; letter-spacing: .03em; }
+.ok-val { font-weight: 700; color: var(--texte); margin-top: .1rem; }
+.optim-regime-note {
+  font-size: .73rem;
+  color: var(--muted);
+  line-height: 1.55;
+  padding-top: .5rem;
+  border-top: 1px solid var(--border);
+}
+.btn-apply-regime {
+  width: 100%;
+  padding: .7rem;
+  background: var(--vert);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: .85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s;
+  margin-top: .5rem;
+}
+.btn-apply-regime:hover { background: var(--vert-f); }
+.excluded-tag {
+  font-size: .7rem;
+  color: var(--rouge);
+  font-weight: 600;
+  padding: .2rem .6rem;
+  background: #fee2e2;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+/* ─────────────────────────
+   HEADER CTA BUTTONS
+───────────────────────── */
+.header-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  margin-left: 2rem;
+}
+.header-cta-group .header-title {
+  flex: 1;
+  margin: 0;
+}
+.header-buttons {
+  display: flex;
+  gap: .7rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.btn-calendly, .btn-linkedin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .6rem 1.1rem;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all .2s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-calendly {
+  background: var(--vert);
+  color: white;
+  box-shadow: 0 2px 8px rgba(31,160,74,.25);
+}
+.btn-calendly:hover {
+  background: var(--vert-f);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(31,160,74,.35);
+}
+.btn-linkedin {
+  background: #f0f4f1;
+  color: var(--texte);
+  border: 1px solid var(--border);
+}
+.btn-linkedin:hover {
+  background: var(--bleu-xl);
+  border-color: var(--bleu);
+  color: var(--bleu-f);
+}
+@media(max-width:1000px) {
+  .header-cta-group {
+    flex-direction: column;
+    gap: .7rem;
+    margin-left: 0;
+    align-items: stretch;
+  }
+  .header-buttons {
+    width: 100%;
+  }
+  .btn-calendly, .btn-linkedin {
+    flex: 1;
+  }
+}
+
+/* ─────────────────────────
+   CHARTS 5-REGIME GRID (Chart.js)
+───────────────────────── */
+.charts-section {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+.charts-header h3 {
+  font-size: .95rem;
+  font-weight: 700;
+  margin-bottom: .2rem;
+}
+.charts-header p {
+  font-size: .72rem;
+  color: var(--muted);
+}
+.charts-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+@media(max-width:1000px) {
+  .charts-grid-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media(max-width:640px) {
+  .charts-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.chart-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.chart-value {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--texte);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.6rem;
+}
+.chart-value.positive {
+  color: #1fa04a;
+}
+.chart-value.negative {
+  color: #dc2626;
+}
+.chart-canvas-wrap {
+  width: 100%;
+  height: 140px;
+  position: relative;
+  flex: 1;
+}
+.chart-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ── NOUVEAU STYLE GRAPHIQUES ── */
+.section-card {
+  background: var(--card);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .9rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(248,250,248,1));
+}
+.card-icon {
+  font-size: 1.2rem;
+}
+.card-title {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--texte);
+  letter-spacing: .01em;
+}
+.card-sub {
+  font-size: .7rem;
+  color: var(--muted);
+  margin-top: .1rem;
+}
+.cf-chart-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border, #dde5de);
+  border-radius: 12px;
+  padding: 10px 8px;
+  min-width: 0;
+}
+.cf-val {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #1a2319;
+}
+.cf-val.pos { color: #1fa04a; }
+.cf-val.neg { color: #dc2626; }
+.cf-bar-wrap {
+  width: 100%;
+  height: 160px;
+  position: relative;
+}
+.cf-bar-wrap canvas {
+
+
+}
+.cf-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #5c6e5f;
+  margin-top: 6px;
+  text-align: center;
+}
+@media (max-width: 900px) {
+  #charts-container { grid-template-columns: repeat(3,1fr) !important; }
+}
+@media (max-width: 600px) {
+  #charts-container { grid-template-columns: repeat(2,1fr) !important; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE COMPLET — TABLETTE & SMARTPHONE
+══════════════════════════════════════════════════ */
+
+/* ── TABLETTE (≤ 900px) ──────────────────────── */
+@media (max-width: 900px) {
+  /* Header : hauteur flexible, logo + boutons sur 2 lignes */
+  .header-inner {
+    height: auto;
+    padding: .55rem 1.2rem;
+    flex-wrap: wrap;
+    gap: .4rem;
+    align-items: center;
+  }
+  .logo-name { font-size: .88rem; }
+  .logo-sub  { font-size: .58rem; }
+
+  /* Boutons header en grille 2 colonnes */
+  .header-cta-group { margin-left: 0; flex-direction: row; flex-wrap: wrap; flex: 1; }
+  .header-title { display: none; }
+  .header-buttons { display: flex; flex-wrap: wrap; gap: .4rem; margin-left: auto; }
+  .btn-calendly, .btn-linkedin {
+    font-size: .75rem;
+    padding: .5rem .85rem;
+    white-space: nowrap;
+  }
+
+  /* Page padding */
+  .page { padding: 1rem 1rem 2.5rem; }
+
+  /* Verdict banner : réduire les gros chiffres */
+  .verdict-pct-big { font-size: 2.6rem; }
+  .verdict-main-text { font-size: 1.2rem; }
+
+  /* Charts : 3 colonnes sur tablette */
+  #charts-container { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+  .cf-val { font-size: 15px; }
+  .cf-bar-wrap { height: 130px; }
+}
+
+/* ── MOBILE (≤ 640px) ───────────────────────── */
+@media (max-width: 640px) {
+  /* Header encore plus compact */
+  .header-inner {
+    height: auto;
+    padding: .5rem .75rem;
+    flex-wrap: wrap;
+    gap: .35rem;
+  }
+  .logo-name { font-size: .82rem; }
+  .logo-sub  { font-size: .56rem; }
+  .header-buttons {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .35rem;
+    margin-top: .1rem;
+  }
+  .btn-calendly, .btn-linkedin {
+    font-size: .7rem;
+    padding: .5rem .4rem;
+    justify-content: center;
+  }
+
+  /* Page */
+  .page { padding: .75rem .65rem 2rem; }
+
+  /* Cards */
+  .card-body { padding: .8rem .85rem; }
+  .card-head  { padding: .7rem .85rem; }
+  .card-head h3 { font-size: .78rem; }
+  .card-head p  { font-size: .65rem; }
+
+  /* Inputs — 16px évite le zoom automatique iOS/Android */
+  input[type=number], select { font-size: 16px; }
+  label { font-size: .68rem; }
+
+  /* Verdict banner */
+  .verdict-banner { padding: 1.1rem .85rem; }
+  .verdict-pct-big  { font-size: 2.2rem; }
+  .verdict-main-text { font-size: 1rem; }
+  .verdict-sub-text  { font-size: .7rem; max-width: 100%; }
+  .verdict-threshold { font-size: .65rem; }
+  .verdict-emoji { font-size: 1.5rem; }
+
+  /* Dashboard : 1 colonne */
+  .dashboard { grid-template-columns: 1fr; gap: .6rem; }
+  .dash-value { font-size: 1.55rem; }
+  .dash-sub   { font-size: .68rem; }
+
+  /* KPIs : 2 colonnes */
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .kpi { padding: .6rem .75rem; }
+  .kpi-value { font-size: .95rem; }
+  .kpi-sub   { font-size: .6rem; }
+
+  /* Charts cashflow : 2 colonnes (5 régimes = 2+2+1) */
+  #charts-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .cf-chart-item { padding: 7px 5px; gap: 4px; }
+  .cf-val { font-size: 13px; margin-bottom: 3px; }
+  .cf-bar-wrap { height: 100px; }
+  .cf-name { font-size: 9px; letter-spacing: .02em; margin-top: 4px; }
+
+  /* Tabs régimes fiscaux : 2 colonnes */
+  .fiscal-tabs { grid-template-columns: 1fr 1fr; gap: .35rem; }
+  .ftab { font-size: .66rem; padding: .38rem .35rem; }
+  .ftab .ftab-sub { font-size: .58rem; }
+
+  /* Tabs entretien : 3 colonnes resserrées */
+  .entretien-type-tabs { grid-template-columns: 1fr 1fr 1fr; gap: .25rem; }
+  .etab { font-size: .62rem; padding: .28rem .2rem; }
+  .etab span { font-size: .57rem; }
+
+  /* Field rows : 2 colonnes (1 col sur très petit via breakpoint ≤400) */
+  .field-row { grid-template-columns: 1fr 1fr; gap: .45rem; }
+  .field { margin-bottom: .6rem; }
+
+  /* Boutons action : vertical */
+  .action-btns { flex-direction: column; gap: .45rem; }
+  .btn-copy, .btn-optim {
+    min-width: 0;
+    flex: none;
+    width: 100%;
+    padding: .8rem 1rem;
+  }
+
+  /* Tableau détail */
+  .detail-table td { font-size: .72rem; padding: .38rem .4rem; }
+
+  /* Modal : slide depuis le bas */
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-box {
+    border-radius: 16px 16px 0 0;
+    max-width: 100%;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  /* Volet optim : plein écran */
+  .optim-panel { width: 100%; }
+
+  /* Section graphiques header */
+  .card-header { padding: .7rem .85rem; }
+  .card-title  { font-size: .78rem; }
+  .card-sub    { font-size: .64rem; }
+}
+
+/* ── PETIT MOBILE (≤ 420px) ─────────────────── */
+@media (max-width: 420px) {
+  /* Field rows → 1 colonne */
+  .field-row { grid-template-columns: 1fr; gap: .0rem; }
+
+  /* Charts : garder 2 colonnes mais encore plus petits */
+  .cf-val { font-size: 12px; }
+  .cf-bar-wrap { height: 90px; }
+  .cf-name { font-size: 8.5px; }
+  .cf-chart-item { padding: 6px 4px; }
+
+  /* Header buttons : 1 colonne */
+  .header-buttons { grid-template-columns: 1fr; }
+
+  /* Verdict encore plus compact */
+  .verdict-pct-big   { font-size: 1.9rem; }
+  .verdict-main-text { font-size: .9rem; }
+
+  /* Page encore + serré */
+  .page { padding: .6rem .5rem 2rem; }
+  .card-body { padding: .7rem .7rem; }
+
+  /* KPIs : label plus compact */
+  .kpi-label { font-size: .58rem; }
+  .kpi-value { font-size: .88rem; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="header-inner">
+    <!-- LOGO SVG (reproduction fidèle) -->
+    <div class="logo-wrap">
+      <svg width="44" height="38" viewBox="0 0 88 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Losange/chevron bleu gauche -->
+  <path d="M0 38 L20 10 L32 10 L32 38 L20 66 Z" fill="url(#bleuGrad)"/>
+  <path d="M20 10 L32 10 L32 38 Z" fill="rgba(0,0,0,0.15)"/>
+  <!-- Barres vertes ascendantes -->
+  <rect x="36" y="44" width="12" height="22" rx="2" fill="url(#vertGrad1)"/>
+  <rect x="52" y="28" width="12" height="38" rx="2" fill="url(#vertGrad2)"/>
+  <rect x="68" y="10" width="12" height="56" rx="2" fill="url(#vertGrad3)"/>
+  <!-- Flèche/pointe sur la 3ème barre -->
+  <polygon points="74,4 68,14 80,14" fill="#1a7a3a"/>
+  <defs>
+    <linearGradient id="bleuGrad" x1="0" y1="0" x2="32" y2="76" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#26c6da"/>
+      <stop offset="100%" stop-color="#0288d1"/>
+    </linearGradient>
+    <linearGradient id="vertGrad1" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#4caf50"/>
+      <stop offset="100%" stop-color="#2e7d32"/>
+    </linearGradient>
+    <linearGradient id="vertGrad2" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#43a047"/>
+      <stop offset="100%" stop-color="#1b5e20"/>
+    </linearGradient>
+    <linearGradient id="vertGrad3" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#66bb6a"/>
+      <stop offset="100%" stop-color="#388e3c"/>
+    </linearGradient>
+  </defs>
+</svg>
+      <div class="logo-text-wrap">
+        <span class="logo-name">Objectif Rentable</span>
+        <span class="logo-sub">Calculateur de rentabilité</span>
+      </div>
+    </div>
+
+    <div class="header-cta-group">
+      <div class="header-title">
+        Analysez votre investissement locatif en quelques secondes
+        <span class="header-badge">Gratuit</span>
+      </div>
+      <div class="header-buttons">
+        <a href="https://calendly.com/david-coachingimmo/45min" class="btn-calendly" target="_blank" rel="noopener">📞 Réserver un coaching gratuit</a>
+        <a href="https://www.linkedin.com/in/david-henry67" class="btn-linkedin" target="_blank" rel="noopener">💼 Mon LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════ PAGE ══════════════ -->
+<div class="page">
+  <div class="main-grid">
+
+    <!-- ══════ COLONNE GAUCHE : INPUTS ══════ -->
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+
+      <!-- CARD 1 : ACQUISITION -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:#eff6ff">🏠</div>
+          <div>
+            <h3>Acquisition du bien</h3>
+            <p>Prix, notaire, travaux et apport</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Type de bien</label>
+            <select id="typeBien" onchange="onTypeBienChange()">
+              <option value="ancien">Ancien (appartement / maison)</option>
+              <option value="neuf">Neuf (VEFA)</option>
+              <option value="parking">Parking / garage</option>
+              <option value="immeuble">Immeuble de rapport</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Prix d'achat (€)</label>
+              <div class="input-group">
+                <input type="number" id="prix" value="120000" min="0" step="1000">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Frais d'agence (€) <span class="label-hint" title="0 si achat en direct (PAP)">?</span></label>
+              <div class="input-group">
+                <input type="number" id="agence" value="0" min="0" step="100">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Taux notaire (%) <span class="label-hint" title="~8% ancien, ~3% neuf, ~8% immeuble">?</span></label>
+              <div class="input-group">
+                <input type="number" id="tauxNotaire" value="8.0" min="0" max="15" step="0.1">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Travaux (€)</label>
+              <div class="input-group">
+                <input type="number" id="travaux" value="8000" min="0" step="500">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Apport personnel (€) <span class="label-hint" title="En général : frais de notaire + travaux">?</span></label>
+            <div class="input-group">
+              <input type="number" id="apport" value="16000" min="0" step="1000">
+              <span class="input-suffix">€</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2 : CRÉDIT -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--bleu-xl)">🏦</div>
+          <div>
+            <h3>Crédit immobilier</h3>
+            <p>Mensualité calculée automatiquement</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Durée (années)</label>
+              <select id="dureePret">
+                <option value="10">10 ans</option>
+                <option value="15">15 ans</option>
+                <option value="20" selected>20 ans</option>
+                <option value="25">25 ans</option>
+                <option value="30">30 ans</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Taux nominal (%)</label>
+              <div class="input-group">
+                <input type="number" id="tauxPret" value="3.8" min="0" max="15" step="0.05">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Taux assurance (%/an) <span class="label-hint" title="En général 0.10% à 0.40% du capital emprunté">?</span></label>
+            <div class="input-group">
+              <input type="number" id="tauxAssurance" value="0.25" min="0" max="2" step="0.01">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3 : REVENUS & CHARGES -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--vert-xl)">💰</div>
+          <div>
+            <h3>Revenus & charges locatives</h3>
+            <p>Loyer, vacance et toutes les charges</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Loyer mensuel HC (€) <span class="label-hint" title="Hors charges récupérables">?</span></label>
+              <div class="input-group">
+                <input type="number" id="loyer" value="750" min="0" step="10">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Vacance locative (%/an) <span class="label-hint" title="8% ≈ 1 mois vide sur 12">?</span></label>
+              <div class="input-group">
+                <input type="number" id="vacance" value="8" min="0" max="100" step="1">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-sep"></div>
+          <div class="section-label">Charges annuelles</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Charges copro non récup. (€/an)</label>
+              <div class="input-group">
+                <input type="number" id="chargesCopro" value="800" min="0" step="50">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Taxe foncière (€/an)</label>
+              <div class="input-group">
+                <input type="number" id="tf" value="900" min="0" step="50">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Assurance PNO (€/an) <span class="label-hint" title="Propriétaire Non Occupant. ~100–250€/an">?</span></label>
+              <div class="input-group">
+                <input type="number" id="pno" value="150" min="0" step="10">
+                <span class="input-suffix">€</span>
+              </div>
+            </div>
+            <div class="field">
+              <label>Frais gestion locative (%)</label>
+              <div class="input-group">
+                <input type="number" id="gestion" value="0" min="0" max="15" step="0.5">
+                <span class="input-suffix">%</span>
+              </div>
+            </div>
+          </div>
+          <!-- ENTRETIEN AUTO selon type de location -->
+          <div class="field">
+            <label style="margin-bottom:.35rem">
+              Provision de travaux par an (€/an)
+              <span class="label-hint" title="Calculée automatiquement selon le type de location. Modifiable manuellement.">?</span>
+            </label>
+            <div class="entretien-type-tabs" id="entretienTabs">
+              <button class="etab active" onclick="setEntretienType('nue',this)">Location nue<br><span>~2.5% loyers</span></button>
+              <button class="etab" onclick="setEntretienType('meublee',this)">Meublée<br><span>~4% loyers</span></button>
+              <button class="etab" onclick="setEntretienType('courte',this)">Courte durée<br><span>~6% loyers</span></button>
+            </div>
+            <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
+              <div class="input-group" style="flex:1">
+                <input type="number" id="entretien" value="432" min="0" step="50">
+                <span class="input-suffix">€</span>
+              </div>
+              <div id="entretienAutoTag" style="font-size:.68rem;font-weight:700;color:var(--vert-f);background:var(--vert-xl);padding:.22rem .6rem;border-radius:50px;white-space:nowrap;flex-shrink:0">Auto ✓</div>
+            </div>
+            <div id="entretienDetail" style="font-size:.72rem;color:var(--muted);margin-top:.25rem;line-height:1.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4 : FISCALITÉ -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:#fef9c3">⚖️</div>
+          <div>
+            <h3>Régime fiscal</h3>
+            <p>Impact réel sur votre cashflow net</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="section-label">Choisissez votre régime</div>
+          <div class="fiscal-tabs" id="fiscalTabs">
+            <div class="ftab active" onclick="setFiscal('microfoncier',this)">
+              Micro-Foncier
+              <span class="ftab-sub">Nu · Abatt. 30%</span>
+            </div>
+            <div class="ftab" onclick="setFiscal('reelnu',this)">
+              Réel Nu
+              <span class="ftab-sub">Déduction charges réelles</span>
+            </div>
+            <div class="ftab" onclick="setFiscal('lmnpMicro',this)">
+              LMNP Micro-BIC
+              <span class="ftab-sub">Meublé · Abatt. 50%</span>
+            </div>
+            <div class="ftab" onclick="setFiscal('lmnpReel',this)">
+              LMNP Réel
+              <span class="ftab-sub">Amortissements</span>
+            </div>
+            <div class="ftab" onclick="setFiscal('sciIs',this)" style="grid-column:1/-1;">
+              SCI à l'IS
+              <span class="ftab-sub">Société · IS 15% / 25%</span>
+            </div>
+          </div>
+
+          <div id="fiscalNote" class="fiscal-note" style="display:none"></div>
+
+          <div class="field-row" style="margin-top:.75rem">
+            <div class="field">
+              <label>TMI — Tranche Marginal Imposition (%) <span class="label-hint" title="Votre tranche d'imposition : 0%, 11%, 30%, 41%, 45%">?</span></label>
+              <select id="tmi">
+                <option value="0">0% (non imposable)</option>
+                <option value="11">11%</option>
+                <option value="30" selected>30%</option>
+                <option value="41">41%</option>
+                <option value="45">45%</option>
+              </select>
+            </div>
+            <div class="field" id="dureeAmortField">
+              <label>Durée amort. bien (ans) <span class="label-hint" title="LMNP Réel : 25–40 ans pour le bâti. Standard: 30 ans">?</span></label>
+              <select id="dureeAmort">
+                <option value="20">20 ans</option>
+                <option value="25" selected>25 ans</option>
+                <option value="30">30 ans</option>
+                <option value="40">40 ans</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOUTONS ACTION -->
+      <div class="action-btns">
+        <button class="btn-copy" onclick="ouvrirCopier()">
+          📋 Copier / Coller mon projet
+        </button>
+        <button class="btn-optim" onclick="ouvrirOptim()">
+          ✨ J'optimise ma fiscalité
+        </button>
+      </div>
+
+    </div><!-- /col gauche -->
+
+    <!-- ══════ COLONNE DROITE : RÉSULTATS ══════ -->
+    <div class="results-col" id="resultsCol">
+
+      <!-- État vide initial -->
+      <div class="card" id="emptyState">
+        <div class="card-body">
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <div class="empty-title">Renseignez vos paramètres et lancez le calcul</div>
+            <div class="empty-sub">Les résultats s'affichent ici : cashflow mensuel et annuel,<br>rendements, détail fiscal et graphiques positif / négatif.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═ DASHBOARD (caché au départ) ═ -->
+      <div id="resultSection" style="display:none;flex-direction:column;gap:1rem;">
+
+        <!-- ═══ VERDICT BANNER ═══ -->
+        <div id="verdictBanner" class="verdict-banner rentable">
+          <div class="verdict-emoji" id="verdictEmoji">✅</div>
+          <div class="verdict-label">Rendement net</div>
+          <div class="verdict-pct-big" id="verdictPctBig">0,00 %</div>
+          <div class="verdict-main-text" id="verdictMainText">INVESTISSEMENT RENTABLE</div>
+          <div class="verdict-sub-text" id="verdictSubText">Votre rendement dépasse le seuil de rentabilité de 7%</div>
+          <div class="verdict-threshold" id="verdictThreshold">🎯 Seuil cible : ≥ 7% net</div>
+        </div>
+
+        <!-- Dashboard principal -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-icon" style="background:var(--vert-xl)">📈</div>
+            <div>
+              <h3>Dashboard — Verdict instantané</h3>
+              <p id="dashRegime">Régime : —</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="dashboard">
+              <div class="dash-card neutre" id="dashMensuel">
+                <div class="dash-label">💶 Cashflow mensuel net</div>
+                <div class="dash-value" id="valMensuel">—</div>
+                <div class="dash-sub">Après crédit, charges et impôts</div>
+                <div class="dash-verdict v-neutre" id="verdictMensuel">—</div>
+              </div>
+              <div class="dash-card neutre" id="dashAnnuel">
+                <div class="dash-label">📅 Cashflow annuel net</div>
+                <div class="dash-value" id="valAnnuel">—</div>
+                <div class="dash-sub">Effort d'épargne annuel</div>
+                <div class="dash-verdict v-neutre" id="verdictAnnuel">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs secondaires -->
+        <div class="kpi-row">
+          <div class="kpi">
+            <div class="kpi-label">Rendement brut</div>
+            <div class="kpi-value vert" id="kpiRendBrut">—</div>
+            <div class="kpi-sub">Loyer annuel / coût total</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Rendement net</div>
+            <div class="kpi-value" id="kpiRendNet">—</div>
+            <div class="kpi-sub">Après charges et fiscalité</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Mensualité crédit</div>
+            <div class="kpi-value bleu" id="kpiMensCredit">—</div>
+            <div class="kpi-sub">Capital + intérêts + assurance</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Coût total achat</div>
+            <div class="kpi-value" id="kpiCoutTotal">—</div>
+            <div class="kpi-sub">Prix + notaire + travaux + agence</div>
+          </div>
+        </div>
+
+        <!-- GRAPHIQUES -->
+        <div class="section-card" id="section-graphiques" style="margin-top:16px;">
+          <div class="card-header">
+            <span class="card-icon">📊</span>
+            <div>
+              <div class="card-title">Cashflow mensuel par régime fiscal</div>
+              <div class="card-sub">Même échelle pour tous — vert = vous gagnez, rouge = vous perdez</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="charts-container" style="display:grid; grid-template-columns: repeat(5,1fr); gap:12px; align-items:end;">
+              <div class="cf-chart-item" id="cf-item-0">
+                <div class="cf-val" id="cf-val-0">—</div>
+                <div class="cf-bar-wrap"><canvas id="chart-0"></canvas></div>
+                <div class="cf-name">Micro-Foncier</div>
+              </div>
+              <div class="cf-chart-item" id="cf-item-1">
+                <div class="cf-val" id="cf-val-1">—</div>
+                <div class="cf-bar-wrap"><canvas id="chart-1"></canvas></div>
+                <div class="cf-name">Réel Nu</div>
+              </div>
+              <div class="cf-chart-item" id="cf-item-2">
+                <div class="cf-val" id="cf-val-2">—</div>
+                <div class="cf-bar-wrap"><canvas id="chart-2"></canvas></div>
+                <div class="cf-name">LMNP Micro</div>
+              </div>
+              <div class="cf-chart-item" id="cf-item-3">
+                <div class="cf-val" id="cf-val-3">—</div>
+                <div class="cf-bar-wrap"><canvas id="chart-3"></canvas></div>
+                <div class="cf-name">LMNP Réel</div>
+              </div>
+              <div class="cf-chart-item" id="cf-item-4">
+                <div class="cf-val" id="cf-val-4">—</div>
+                <div class="cf-bar-wrap"><canvas id="chart-4"></canvas></div>
+                <div class="cf-name">SCI IS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DÉTAIL CALCUL -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-icon" style="background:#f3f4f6">🔍</div>
+            <div>
+              <h3>Détail des calculs</h3>
+              <p>Décomposition complète pour une décision éclairée</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <table class="detail-table" id="detailTable">
+              <!-- rempli par JS -->
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /resultSection -->
+
+    </div><!-- /col droite -->
+  </div><!-- /main-grid -->
+</div><!-- /page -->
+
+<!-- ══════════════ MODAL COPIER / COLLER ══════════════ -->
+<div class="modal-overlay" id="copierModal" onclick="if(event.target===this)fermerCopier()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h4>📋 Mon projet</h4>
+      <button class="modal-close" onclick="fermerCopier()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs">
+        <button class="mtab active" onclick="switchMTab('copier',this)">📤 Copier</button>
+        <button class="mtab" onclick="switchMTab('coller',this)">📥 Restaurer</button>
+      </div>
+
+      <!-- Onglet Copier -->
+      <div class="modal-tab-content active" id="mtab-copier">
+        <p class="modal-note">Copiez ce texte et gardez-le précieusement — collez-le dans l'onglet "Restaurer" pour retrouver tous vos paramètres à l'identique.</p>
+        <textarea class="modal-textarea" id="copyTextarea" readonly></textarea>
+        <div class="modal-actions">
+          <button class="btn-modal-primary" onclick="copierTexte()">📋 Copier dans le presse-papiers</button>
+        </div>
+        <div class="copy-confirm" id="copyConfirm"></div>
+      </div>
+
+      <!-- Onglet Coller/Restaurer -->
+      <div class="modal-tab-content" id="mtab-coller">
+        <p class="modal-note">Collez ici un texte de projet précédemment copié pour restaurer tous vos paramètres automatiquement.</p>
+        <textarea class="modal-textarea" id="pasteTextarea" placeholder="Collez votre projet ici..."></textarea>
+        <div class="modal-actions">
+          <button class="btn-modal-primary" onclick="restaurerProjet()">✅ Restaurer mon projet</button>
+          <button class="btn-modal-secondary" onclick="fermerCopier()">Annuler</button>
+        </div>
+        <div class="copy-confirm" id="pasteConfirm"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ OVERLAY + VOLET OPTIMISATION ══════════════ -->
+<div class="optim-overlay" id="optimOverlay" onclick="fermerOptim()"></div>
+
+<div class="optim-panel" id="optimPanel">
+
+  <!-- En-tête -->
+  <div class="optim-head">
+    <div class="optim-head-icon">✨</div>
+    <div class="optim-head-text">
+      <h4>Optimisez votre fiscalité</h4>
+      <p>Trouvez le régime qui maximise votre cashflow net</p>
+    </div>
+    <button class="optim-head-close" onclick="fermerOptim()">✕</button>
+  </div>
+
+  <div class="optim-body">
+
+    <!-- Section questions -->
+    <div id="optimQuestions">
+
+      <!-- Q1 : Objectif -->
+      <div style="margin-bottom:1rem">
+        <div class="optim-section-title">1. Votre objectif principal</div>
+        <div class="optim-choices" id="q-objectif">
+          <label class="optim-choice selected" onclick="selectChoice('q-objectif',this,'revenu')">
+            <input type="radio" name="objectif" value="revenu" checked>
+            <div>
+              <div class="optim-choice-title">💶 Revenu complémentaire</div>
+              <div class="optim-choice-desc">Je veux générer du cashflow positif chaque mois dès maintenant</div>
+            </div>
+          </label>
+          <label class="optim-choice" onclick="selectChoice('q-objectif',this,'patrimoine')">
+            <input type="radio" name="objectif" value="patrimoine">
+            <div>
+              <div class="optim-choice-title">🏛️ Constitution de patrimoine</div>
+              <div class="optim-choice-desc">Je vise la valorisation long terme et la plus-value à la revente</div>
+            </div>
+          </label>
+          <label class="optim-choice" onclick="selectChoice('q-objectif',this,'mixte')">
+            <input type="radio" name="objectif" value="mixte">
+            <div>
+              <div class="optim-choice-title">⚖️ Les deux à la fois</div>
+              <div class="optim-choice-desc">Je veux un cashflow correct ET constituer du patrimoine</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Q2 : Meublé ou nu -->
+      <div style="margin-bottom:1rem">
+        <div class="optim-section-title">2. Location meublée possible ?</div>
+        <div class="optim-choices" id="q-meuble">
+          <label class="optim-choice selected" onclick="selectChoice('q-meuble',this,'oui')">
+            <input type="radio" name="meuble" value="oui" checked>
+            <div>
+              <div class="optim-choice-title">✅ Oui, je peux meubler</div>
+              <div class="optim-choice-desc">Je peux équiper le bien (LMNP possible — loyer ~15–20% plus élevé)</div>
+            </div>
+          </label>
+          <label class="optim-choice" onclick="selectChoice('q-meuble',this,'non')">
+            <input type="radio" name="meuble" value="non">
+            <div>
+              <div class="optim-choice-title">🚫 Non, location nue uniquement</div>
+              <div class="optim-choice-desc">Immeuble, parking, ou bien nu imposé (Micro-Foncier / Réel Nu seulement)</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Q3 : Durée de détention -->
+      <div style="margin-bottom:1rem">
+        <div class="optim-section-title">3. Durée de détention envisagée</div>
+        <div class="optim-choices" id="q-duree">
+          <label class="optim-choice selected" onclick="selectChoice('q-duree',this,'long')">
+            <input type="radio" name="duree" value="long" checked>
+            <div>
+              <div class="optim-choice-title">📅 Long terme (7 ans et +)</div>
+              <div class="optim-choice-desc">Je conserve le bien longtemps et profite des amortissements</div>
+            </div>
+          </label>
+          <label class="optim-choice" onclick="selectChoice('q-duree',this,'court')">
+            <input type="radio" name="duree" value="court">
+            <div>
+              <div class="optim-choice-title">⚡ Court/moyen terme (moins de 7 ans)</div>
+              <div class="optim-choice-desc">Je revends dans quelques années — SCI IS peut pénaliser à la revente</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-run-optim" onclick="lancerOptimisation()">
+        🔍 Comparer tous les régimes pour moi
+      </button>
+    </div>
+
+    <!-- Résultats (cachés par défaut) -->
+    <div class="optim-results" id="optimResults">
+      <!-- rempli dynamiquement -->
+    </div>
+
+    <!-- Bouton relancer -->
+    <div id="optimRelancer" style="display:none">
+      <button class="btn-modal-secondary" style="width:100%" onclick="reinitOptim()">
+        ↩ Modifier mes réponses
+      </button>
+    </div>
+
+  </div><!-- /optim-body -->
+</div><!-- /optim-panel -->
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+/* ── État ── */
+let regime = 'microfoncier';
+
+let _chartsInited = false;
+
+/* ── Régime fiscal ── */
+
+/* Formatage des nombres */
+function formatNumber(value) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(Math.round(value));
+}
+
+// ── GRAPHIQUES CASHFLOW ──────────────────────────────────────
+let _charts = [null, null, null, null, null];
+
+function initCharts() {
+  const labels = ['Micro-Foncier', 'Réel Nu', 'LMNP Micro', 'LMNP Réel', 'SCI IS'];
+  for (let i = 0; i < 5; i++) {
+    const canvas = document.getElementById('chart-' + i);
+    if (!canvas) continue;
+    if (_charts[i]) { _charts[i].destroy(); }
+    _charts[i] = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: [labels[i]],
+        datasets: [{
+          data: [0],
+          backgroundColor: ['#cccccc'],
+          borderRadius: 6,
+          barThickness: 40,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => fmtEur(ctx.raw) + ' / mois'
+            }
+          }
+        },
+        scales: {
+          x: { display: false },
+          y: {
+            min: -100,
+            max: 100,
+            grid: {
+              color: ctx => ctx.tick.value === 0 ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.07)',
+              lineWidth: ctx => ctx.tick.value === 0 ? 2 : 1,
+            },
+            ticks: {
+              callback: v => v === 0 ? '0' : fmtEurShort(v),
+              font: { size: 9 },
+              maxTicksLimit: 5,
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+function updateCharts(cfArray) {
+  // cfArray = [cf_microfoncier, cf_reelnu, cf_lmnpmicro, cf_lmnpreel, cf_sciis]
+  const vals = cfArray.map(v => isFinite(v) ? v : 0);
+
+  // Échelle partagée
+  const absMax = Math.max(Math.abs(Math.min(...vals, 0)), Math.abs(Math.max(...vals, 0)), 50);
+  const margin = absMax * 0.18;
+  const yMin = -(absMax + margin);
+  const yMax = absMax + margin;
+
+  vals.forEach((val, i) => {
+    const el = document.getElementById('cf-val-' + i);
+    if (el) {
+      el.textContent = fmtEur(val) + ' /mois';
+      el.className = 'cf-val ' + (val >= 0 ? 'pos' : 'neg');
+    }
+
+    if (_charts[i]) {
+      const color = val >= 0 ? '#1fa04a' : '#dc2626';
+      _charts[i].data.datasets[0].data = [val];
+      _charts[i].data.datasets[0].backgroundColor = [color];
+      _charts[i].data.datasets[0].hoverBackgroundColor = [color];
+      _charts[i].options.scales.y.min = yMin;
+      _charts[i].options.scales.y.max = yMax;
+      _charts[i].update('none');
+    }
+  });
+}
+
+function updateCashflowCharts(results) {
+  // Wrapper pour compatibilité avec ancien code
+  const cfArray = [results.microfoncier, results.reelnu, results.lmnpMicro, results.lmnpReel, results.sciIs];
+  updateCharts(cfArray);
+}
+
+function calcAllRegimes() {
+  const prix       = +v('prix');
+  const agence     = +v('agence');
+  const notaire    = prix * (+v('tauxNotaire') / 100);
+  const travaux    = +v('travaux');
+  const apport     = +v('apport');
+  
+  const { mensCredit, mensAssur, mensTotal, capital } = getMensualite();
+  
+  const loyerMens     = +v('loyer');
+  const vacPct        = +v('vacance') / 100;
+  const loyerAnnuelBrut = loyerMens * 12;
+  const loyerEffectif   = loyerAnnuelBrut * (1 - vacPct);
+  
+  const chargesCopro = +v('chargesCopro');
+  const tf           = +v('tf');
+  const pno          = +v('pno');
+  const gestion      = loyerEffectif * (+v('gestion') / 100);
+  const entretien    = +v('entretien');
+  const chargesTotal = chargesCopro + tf + pno + gestion + entretien;
+  
+  const tmi           = +document.getElementById('tmi').value / 100;
+  const pretSocial    = 0.172;
+  const tauxGlobal    = tmi + pretSocial;
+  
+  const tauxNomAnn   = +v('tauxPret') / 100;
+  const interetsAn1  = capital * tauxNomAnn;
+  const mensualiteAnnuelle = mensTotal * 12;
+  
+  const results = {};
+  
+  // Micro-Foncier
+  let revenuImposable = loyerEffectif * 0.70;
+  let impots = Math.max(revenuImposable * tauxGlobal, 0);
+  results.microfoncier = (loyerEffectif - chargesTotal - mensualiteAnnuelle - impots) / 12;
+  
+  // Réel Nu
+  revenuImposable = Math.max(loyerEffectif - chargesTotal - interetsAn1, 0);
+  impots = Math.max(revenuImposable * tauxGlobal, 0);
+  results.reelnu = (loyerEffectif - chargesTotal - mensualiteAnnuelle - impots) / 12;
+  
+  // LMNP Micro
+  revenuImposable = loyerEffectif * 0.50;
+  impots = Math.max(revenuImposable * tauxGlobal, 0);
+  results.lmnpMicro = (loyerEffectif - chargesTotal - mensualiteAnnuelle - impots) / 12;
+  
+  // LMNP Réel
+  const dureeAmort = +document.getElementById('dureeAmort').value;
+  const valeurBati = prix * 0.80;
+  const amortBati  = valeurBati / dureeAmort;
+  const amortTrav  = travaux / 10;
+  const totalAmort = amortBati + amortTrav;
+  revenuImposable  = Math.max(loyerEffectif - chargesTotal - interetsAn1 - totalAmort, 0);
+  impots = Math.max(revenuImposable * tauxGlobal, 0);
+  results.lmnpReel = (loyerEffectif - chargesTotal - mensualiteAnnuelle - impots) / 12;
+  
+  // SCI IS
+  const valeurBatiSCI = prix * 0.80;
+  const amortBatiSCI  = valeurBatiSCI / 30;
+  const amortTravSCI  = travaux / 10;
+  const resultatSCI   = loyerEffectif - chargesTotal - interetsAn1 - amortBatiSCI - amortTravSCI - (mensAssur * 12);
+  let impotsSCI = 0;
+  if (resultatSCI > 0) {
+    if (resultatSCI <= 42500) impotsSCI = resultatSCI * 0.15;
+    else impotsSCI = 42500 * 0.15 + (resultatSCI - 42500) * 0.25;
+  }
+  results.sciIs = (loyerEffectif - chargesTotal - mensualiteAnnuelle - impotsSCI) / 12;
+  
+  return results;
+}
+
+
+const fiscalNotes = {
+  microfoncier: '<strong>Micro-foncier :</strong> Abattement forfaitaire de 30%. Vous êtes imposé sur 70% de vos revenus locatifs bruts. Accessible si revenus locatifs bruts &lt; 15 000 €/an. Location nue uniquement.',
+  reelnu:       '<strong>Réel (nu) :</strong> Déduction de toutes les charges réelles (charges, TF, PNO, intérêts d\'emprunt, travaux). Résultat = revenus − toutes charges déductibles. Plus avantageux si charges élevées.',
+  lmnpMicro:    '<strong>LMNP Micro-BIC :</strong> Abattement forfaitaire de 50%. Vous êtes imposé sur 50% des recettes. Location meublée uniquement. Accessible si CA &lt; 77 700 €/an.',
+  lmnpReel:     '<strong>LMNP Réel :</strong> Déduction des charges + amortissements (bâti ~3% / an, travaux ~10% / an). Peut effacer la quasi-totalité de la fiscalité. Le plus avantageux dans la durée.',
+  sciIs:        '<strong>SCI à l\'IS :</strong> IS 15% sur les 42 500 premiers euros de bénéfice, 25% au-delà. Possibilité de déduire amortissements. Attention : imposition à la revente sur plus-value importante.',
+};
+
+function setFiscal(r, el) {
+  regime = r;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const note = document.getElementById('fiscalNote');
+  note.innerHTML = fiscalNotes[r];
+  note.style.display = 'block';
+  // Afficher/masquer durée amortissement
+  document.getElementById('dureeAmortField').style.display = r === 'lmnpReel' ? 'block' : 'none';
+  calculer();
+}
+
+function onTypeBienChange() {
+  const t = document.getElementById('typeBien').value;
+  const tn = document.getElementById('tauxNotaire');
+  if (t === 'neuf') tn.value = 3.0;
+  else tn.value = 8.0;
+  calculer();
+}
+
+/* ── Mensualité crédit (PMT) ── */
+function pmt(rate_monthly, n_months, principal) {
+  if (rate_monthly === 0) return principal / n_months;
+  return principal * rate_monthly * Math.pow(1 + rate_monthly, n_months) / (Math.pow(1 + rate_monthly, n_months) - 1);
+}
+
+function getCapital() {
+  const prix    = +v('prix');
+  const agence  = +v('agence');
+  const notaire = prix * (+v('tauxNotaire') / 100);
+  const travaux = +v('travaux');
+  const apport  = +v('apport');
+  const total   = prix + agence + notaire + travaux;
+  return Math.max(total - apport, 0);
+}
+
+function getMensualite() {
+  const capital = getCapital();
+  const n = +document.getElementById('dureePret').value * 12;
+  const tauxNominal = +v('tauxPret') / 100;
+  const tauxMensuel = tauxNominal / 12;
+  const mensCredit = pmt(tauxMensuel, n, capital);
+  const mensAssur  = capital * (+v('tauxAssurance') / 100) / 12;
+  return { mensCredit, mensAssur, mensTotal: mensCredit + mensAssur, capital };
+}
+
+/* ── Calcul principal ── */
+function calculer() {
+  const prix       = +v('prix');
+  const agence     = +v('agence');
+  const notaire    = prix * (+v('tauxNotaire') / 100);
+  const travaux    = +v('travaux');
+  const apport     = +v('apport');
+  const coutTotal  = prix + agence + notaire + travaux;
+
+  const { mensCredit, mensAssur, mensTotal, capital } = getMensualite();
+
+  const loyerMens     = +v('loyer');
+  const vacPct        = +v('vacance') / 100;
+  const loyerAnnuelBrut = loyerMens * 12;
+  const loyerEffectif   = loyerAnnuelBrut * (1 - vacPct);
+
+  const chargesCopro = +v('chargesCopro');
+  const tf           = +v('tf');
+  const pno          = +v('pno');
+  const gestion      = loyerEffectif * (+v('gestion') / 100);
+  const entretien    = +v('entretien');
+  const chargesTotal = chargesCopro + tf + pno + gestion + entretien;
+
+  const tmi           = +document.getElementById('tmi').value / 100;
+  const pretSocial    = 0.172; // 17.2% prélèvements sociaux
+  const tauxGlobal    = tmi + pretSocial;
+
+  // Intérêts annuels (1ère année, approximation)
+  const tauxNomAnn   = +v('tauxPret') / 100;
+  const interetsAn1  = capital * tauxNomAnn; // simplification (vrai calcul = tableau amort.)
+
+  /* ── Calcul fiscal selon régime ── */
+  let revenuImposable = 0;
+  let impots          = 0;
+  let notesFiscal     = '';
+
+  if (regime === 'microfoncier') {
+    revenuImposable = loyerEffectif * 0.70;
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+    notesFiscal = `Revenus imposables = ${fmtEur(loyerEffectif)} × 70% = ${fmtEur(revenuImposable)} · Impôts = ${fmtEur(revenuImposable)} × ${Math.round(tauxGlobal*100)}% (TMI+PS)`;
+
+  } else if (regime === 'reelnu') {
+    // Réel nu : revenus − charges − intérêts
+    revenuImposable = Math.max(loyerEffectif - chargesTotal - interetsAn1, 0);
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+    notesFiscal = `Revenu net = loyer effectif − charges − intérêts = ${fmtEur(loyerEffectif - chargesTotal - interetsAn1)} · Impôts = ${fmtEur(impots)}`;
+
+  } else if (regime === 'lmnpMicro') {
+    revenuImposable = loyerEffectif * 0.50;
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+    notesFiscal = `Revenus imposables = ${fmtEur(loyerEffectif)} × 50% = ${fmtEur(revenuImposable)} · Impôts = ${fmtEur(impots)}`;
+
+  } else if (regime === 'lmnpReel') {
+    // LMNP Réel : amortissements sur la valeur du bâti (hors terrain ~20%)
+    const dureeAmort = +document.getElementById('dureeAmort').value;
+    const valeurBati = prix * 0.80; // 80% du prix = bâti
+    const amortBati  = valeurBati / dureeAmort;
+    const amortTrav  = travaux / 10; // travaux amortis sur 10 ans
+    const totalAmort = amortBati + amortTrav;
+    revenuImposable  = Math.max(loyerEffectif - chargesTotal - interetsAn1 - totalAmort, 0);
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+    notesFiscal = `Amortissements = ${fmtEur(totalAmort)}/an · Revenu imposable = ${fmtEur(revenuImposable)} · Impôts = ${fmtEur(impots)}`;
+
+  } else if (regime === 'sciIs') {
+    // SCI IS : charges déductibles + amortissements, IS sur bénéfice
+    const dureeAmort = 30;
+    const valeurBati = prix * 0.80;
+    const amortBati  = valeurBati / dureeAmort;
+    const amortTrav  = travaux / 10;
+    const resultat   = loyerEffectif - chargesTotal - interetsAn1 - amortBati - amortTrav - (mensAssur * 12);
+    if (resultat <= 0) { impots = 0; revenuImposable = 0; }
+    else if (resultat <= 42500) { impots = resultat * 0.15; revenuImposable = resultat; }
+    else { impots = 42500 * 0.15 + (resultat - 42500) * 0.25; revenuImposable = resultat; }
+    notesFiscal = `Résultat fiscal = ${fmtEur(revenuImposable)} · IS = ${fmtEur(impots)} (15% jusqu'à 42 500€, 25% au-delà)`;
+  }
+
+  /* ── Cashflow ── */
+  const mensualiteAnnuelle = mensTotal * 12;
+  const cashflowNetAnnuel  = loyerEffectif - chargesTotal - mensualiteAnnuelle - impots;
+  const cashflowNetMensuel = cashflowNetAnnuel / 12;
+
+  const rendementBrut = coutTotal > 0 ? (loyerAnnuelBrut / coutTotal) * 100 : 0;
+  const rendementNet  = coutTotal > 0 ? ((loyerEffectif - chargesTotal - impots) / coutTotal) * 100 : 0;
+
+  /* ── Affichage dashboard ── */
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultSection').style.display = 'flex';
+
+  setDash('dashMensuel', 'valMensuel', 'verdictMensuel', cashflowNetMensuel, '€/mois');
+  setDash('dashAnnuel',  'valAnnuel',  'verdictAnnuel',  cashflowNetAnnuel,  '€/an');
+
+  document.getElementById('dashRegime').textContent = `Régime : ${regimeLabel(regime)} · TMI : ${Math.round(tmi*100)}%`;
+
+  /* ── VERDICT BANNER — 3 états ── */
+  /* ✅ RENTABLE    : cashflow mensuel positif (l'investissement s'autofinance)  */
+  /* ⚠️ PEU RENTABLE: rendement ≥ 6% mais cashflow mensuel négatif              */
+  /* ❌ NON RENTABLE: rendement < 6% ET/OU cashflow négatif                     */
+  const cfPositif = cashflowNetMensuel > 0;
+  const yieldOk   = rendementNet >= 6;
+
+  let vClass, vEmoji, vMain, vSub, vThresh;
+
+  if (cfPositif) {
+    vClass  = 'rentable';
+    vEmoji  = '✅';
+    vMain   = 'INVESTISSEMENT RENTABLE';
+    vSub    = `L'investissement s'autofinance — cashflow positif de ${fmtEur(cashflowNetMensuel)}/mois après crédit, charges et impôts`;
+    vThresh = `💶 Cashflow positif ✓  ·  Rendement net ${rendementNet.toFixed(2).replace('.',',')}%`;
+  } else if (yieldOk) {
+    vClass  = 'peurentable';
+    vEmoji  = '⚠️';
+    vMain   = 'PEU RENTABLE';
+    vSub    = `Rendement net ${rendementNet.toFixed(1).replace('.',',')}% (≥ 6%) mais cashflow négatif de ${fmtEur(cashflowNetMensuel)}/mois — vous sortez de l'argent chaque mois`;
+    vThresh = `⚠️ Yield ≥ 6% ✓  mais cashflow négatif — optimisez votre fiscalité`;
+  } else {
+    vClass  = 'nonrentable';
+    vEmoji  = '❌';
+    vMain   = 'NON RENTABLE';
+    vSub    = `Rendement net ${rendementNet.toFixed(1).replace('.',',')}% insuffisant et cashflow négatif — renégociez le prix ou optimisez le financement`;
+    vThresh = `🎯 Seuil : ≥ 6% net + cashflow positif requis`;
+  }
+
+  const vBanner = document.getElementById('verdictBanner');
+  vBanner.className = 'verdict-banner ' + vClass;
+  document.getElementById('verdictEmoji').textContent    = vEmoji;
+  document.getElementById('verdictPctBig').textContent   = rendementNet.toFixed(2).replace('.',',') + ' %';
+  document.getElementById('verdictMainText').textContent = vMain;
+  document.getElementById('verdictSubText').textContent  = vSub;
+  document.getElementById('verdictThreshold').textContent = vThresh;
+
+  /* ── KPIs ── */
+  document.getElementById('kpiRendBrut').textContent = rendementBrut.toFixed(2).replace('.',',') + ' %';
+  const netEl = document.getElementById('kpiRendNet');
+  netEl.textContent = rendementNet.toFixed(2).replace('.',',') + ' %';
+  netEl.className = 'kpi-value ' + (rendementNet >= 6 ? 'vert' : 'rouge');
+  document.getElementById('kpiMensCredit').textContent = fmtEur(mensTotal) + '/mois';
+  document.getElementById('kpiCoutTotal').textContent  = fmtEur(coutTotal);
+
+  /* ── Détail tableau ── */
+  const rows = [
+    ['── ACQUISITION ──', ''],
+    ['Prix d\'achat', fmtEur(prix)],
+    ['+ Frais d\'agence', fmtEur(agence)],
+    ['+ Frais de notaire (' + v('tauxNotaire') + '%)', fmtEur(notaire)],
+    ['+ Travaux', fmtEur(travaux)],
+    ['= Coût total acquisition', fmtEur(coutTotal), 'total', null],
+    ['Apport personnel', fmtEur(apport)],
+    ['Capital emprunté', fmtEur(capital)],
+    ['── CRÉDIT ──', ''],
+    ['Mensualité (capital + intérêts)', fmtEur(mensCredit) + '/mois'],
+    ['Mensualité assurance', fmtEur(mensAssur) + '/mois'],
+    ['Mensualité TOTALE', fmtEur(mensTotal) + '/mois', 'total', null],
+    ['Mensualités annuelles', fmtEur(mensualiteAnnuelle)],
+    ['── REVENUS LOCATIFS ──', ''],
+    ['Loyer mensuel brut', fmtEur(loyerMens) + '/mois'],
+    ['Loyer annuel brut', fmtEur(loyerAnnuelBrut)],
+    ['− Vacance locative (' + v('vacance') + '% × ' + fmtEur(loyerAnnuelBrut) + ')', '− ' + fmtEur(loyerAnnuelBrut * vacPct)],
+    ['= Loyer effectif annuel', fmtEur(loyerEffectif), 'total', null],
+    ['── CHARGES ANNUELLES ──', ''],
+    ['Charges copropriété', fmtEur(chargesCopro)],
+    ['Taxe foncière', fmtEur(tf)],
+    ['Assurance PNO', fmtEur(pno)],
+    ['Frais de gestion', fmtEur(gestion)],
+    ['Entretien / provisions', fmtEur(entretien)],
+    ['= Total charges', fmtEur(chargesTotal), 'total', null],
+    ['── FISCALITÉ ──', ''],
+    ['Régime : ' + regimeLabel(regime), ''],
+    ['Revenus imposables', fmtEur(revenuImposable)],
+    ['Impôts + prélèvements sociaux', fmtEur(impots), null, impots > 0 ? 'negatif' : null],
+    ['── RÉSULTAT FINAL ──', ''],
+    ['Loyer effectif annuel', fmtEur(loyerEffectif)],
+    ['− Charges', '− ' + fmtEur(chargesTotal)],
+    ['− Mensualités crédit', '− ' + fmtEur(mensualiteAnnuelle)],
+    ['− Impôts', '− ' + fmtEur(impots)],
+    ['= CASHFLOW NET ANNUEL', fmtEur(cashflowNetAnnuel), 'total', cashflowNetAnnuel >= 0 ? 'positif' : 'negatif'],
+    ['= CASHFLOW NET MENSUEL', fmtEur(cashflowNetMensuel) + '/mois', 'total', cashflowNetMensuel >= 0 ? 'positif' : 'negatif'],
+  ];
+
+  const tbl = document.getElementById('detailTable');
+  tbl.innerHTML = rows.map(([label, val, rowClass, valClass]) => {
+    if (val === '') return `<tr><td colspan="2" style="padding-top:.6rem;padding-bottom:.2rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--fond)">${label}</td></tr>`;
+    const rC = rowClass || '';
+    const vC = valClass ? `style="color:var(--${valClass === 'positif' ? 'vert-f' : valClass === 'negatif' ? 'rouge' : 'texte'})"` : '';
+    return `<tr class="${rC}"><td>${label}</td><td ${vC}>${val}</td></tr>`;
+  }).join('');
+
+  /* ── Graphiques 5 régimes ── */
+  if (!_chartsInited) { initCharts(); _chartsInited = true; }
+  updateCashflowCharts(calcAllRegimes());
+
+  // Scroll vers résultats sur mobile
+  if (window.innerWidth <= 900) {
+    document.getElementById('resultSection').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+}
+
+/* ── Graphique barre unique ── */
+function drawChart(canvasId, existingChart, value, label, setRef) {
+  const canvas = document.getElementById(canvasId);
+  if (existingChart) { existingChart.destroy(); }
+
+  const isPos = value >= 0;
+  const color = isPos ? '#1fa04a' : '#dc2626';
+  const colorAlpha = isPos ? 'rgba(31,160,74,.12)' : 'rgba(220,38,38,.12)';
+
+  const chart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: [label],
+      datasets: [{
+        label: label + ' (€)',
+        data: [value],
+        backgroundColor: color,
+        borderColor: color,
+        borderWidth: 0,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + fmtEur(ctx.raw) + (label === 'Mensuel' ? '/mois' : '/an'),
+          }
+        },
+        annotation: {}
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11, weight: '600' }, color: '#5c6e5f' }
+        },
+        y: {
+          grid: {
+            color: ctx => ctx.tick.value === 0 ? '#374151' : '#e5e7eb',
+            lineWidth: ctx => ctx.tick.value === 0 ? 2 : 1,
+          },
+          ticks: {
+            font: { size: 10 },
+            color: '#5c6e5f',
+            callback: v => fmtEurShort(v),
+          }
+        }
+      }
+    }
+  });
+  setRef(chart);
+}
+
+/* ── Helpers ── */
+function v(id) { return document.getElementById(id).value; }
+
+function fmtEur(n) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency', currency: 'EUR', maximumFractionDigits: 0
+  }).format(n || 0);
+}
+
+function fmtEurShort(n) {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency', currency: 'EUR', maximumFractionDigits: 0
+  }).format(Math.round(n || 0));
+}
+
+function regimeLabel(r) {
+  const labels = { microfoncier:'Micro-Foncier', reelnu:'Réel Nu', lmnpMicro:'LMNP Micro-BIC', lmnpReel:'LMNP Réel', sciIs:'SCI à l\'IS' };
+  return labels[r] || r;
+}
+
+function setDash(cardId, valId, verdictId, value, unit) {
+  const card    = document.getElementById(cardId);
+  const valEl   = document.getElementById(valId);
+  const verdEl  = document.getElementById(verdictId);
+  const isPos   = value >= 0;
+
+  card.className = 'dash-card ' + (isPos ? 'positif' : 'negatif');
+  valEl.textContent = fmtEur(value);
+  verdEl.className = 'dash-verdict ' + (isPos ? 'v-positif' : 'v-negatif');
+  verdEl.textContent = isPos ? '✓ Cashflow positif' : '⚠ Effort d\'épargne requis';
+}
+
+/* ════════════════════════════════
+   AUTO-RECALCUL SUR CHAQUE INPUT
+═════════════════════════════════ */
+function initAutoCalc() {
+  const allInputs = ['prix','agence','tauxNotaire','travaux','apport',
+    'tauxPret','tauxAssurance','loyer','vacance','chargesCopro',
+    'tf','pno','gestion','entretien'];
+  allInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => calculer());
+  });
+  ['typeBien','dureePret','tmi','dureeAmort'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => calculer());
+  });
+}
+
+/* ════════════════════════════════
+   COPIER / COLLER MON PROJET
+═════════════════════════════════ */
+function genererTexteProjet() {
+  const d = {
+    BIEN:       document.getElementById('typeBien').value,
+    PRIX:       v('prix'),
+    AGENCE:     v('agence'),
+    NOTAIRE:    v('tauxNotaire'),
+    TRAVAUX:    v('travaux'),
+    APPORT:     v('apport'),
+    DUREE:      document.getElementById('dureePret').value,
+    TAUX:       v('tauxPret'),
+    ASSURANCE:  v('tauxAssurance'),
+    LOYER:      v('loyer'),
+    VACANCE:    v('vacance'),
+    COPRO:      v('chargesCopro'),
+    TF:         v('tf'),
+    PNO:        v('pno'),
+    GESTION:    v('gestion'),
+    ENTRETIEN:  v('entretien'),
+    REGIME:     regime,
+    TMI:        document.getElementById('tmi').value,
+    AMORT:      document.getElementById('dureeAmort').value,
+  };
+  const lines = [
+    '📊 PROJET — OBJECTIF RENTABLE',
+    '══════════════════════════════',
+    ...Object.entries(d).map(([k,val]) => `${k}: ${val}`),
+    '══════════════════════════════',
+    `Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}`,
+  ];
+  return lines.join('\n');
+}
+
+function ouvrirCopier() {
+  document.getElementById('copyTextarea').value = genererTexteProjet();
+  document.getElementById('copyConfirm').textContent = '';
+  document.getElementById('pasteConfirm').textContent = '';
+  document.getElementById('pasteTextarea').value = '';
+  // Activer onglet Copier
+  switchMTab('copier', document.querySelector('.mtab'));
+  document.getElementById('copierModal').classList.add('open');
+}
+function fermerCopier() {
+  document.getElementById('copierModal').classList.remove('open');
+}
+function switchMTab(id, btn) {
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.modal-tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('mtab-' + id).classList.add('active');
+}
+function copierTexte() {
+  const ta = document.getElementById('copyTextarea');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      document.getElementById('copyConfirm').textContent = '✓ Copié dans le presse-papiers !';
+    });
+  } else {
+    ta.select();
+    document.execCommand('copy');
+    document.getElementById('copyConfirm').textContent = '✓ Copié !';
+  }
+}
+function restaurerProjet() {
+  const text = document.getElementById('pasteTextarea').value;
+  const map = {};
+  text.split('\n').forEach(line => {
+    const [k, ...rest] = line.split(':');
+    if (k && rest.length) map[k.trim()] = rest.join(':').trim();
+  });
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+  const setRegime = (r, label) => {
+    if (!r) return;
+    const tabs = document.querySelectorAll('.ftab');
+    const regimeMap = { microfoncier: 0, reelnu: 1, lmnpMicro: 2, lmnpReel: 3, sciIs: 4 };
+    const idx = regimeMap[r];
+    if (idx !== undefined && tabs[idx]) setFiscal(r, tabs[idx]);
+  };
+  set('typeBien',     map.BIEN);
+  set('prix',         map.PRIX);
+  set('agence',       map.AGENCE);
+  set('tauxNotaire',  map.NOTAIRE);
+  set('travaux',      map.TRAVAUX);
+  set('apport',       map.APPORT);
+  set('dureePret',    map.DUREE);
+  set('tauxPret',     map.TAUX);
+  set('tauxAssurance',map.ASSURANCE);
+  set('loyer',        map.LOYER);
+  set('vacance',      map.VACANCE);
+  set('chargesCopro', map.COPRO);
+  set('tf',           map.TF);
+  set('pno',          map.PNO);
+  set('gestion',      map.GESTION);
+  set('entretien',    map.ENTRETIEN);
+  set('tmi',          map.TMI);
+  set('dureeAmort',   map.AMORT);
+  setRegime(map.REGIME);
+  calculer();
+  document.getElementById('pasteConfirm').textContent = '✓ Projet restauré !';
+  setTimeout(fermerCopier, 900);
+}
+
+/* ════════════════════════════════
+   VOLET OPTIMISATION FISCALE
+═════════════════════════════════ */
+function ouvrirOptim() {
+  document.getElementById('optimOverlay').classList.add('open');
+  document.getElementById('optimPanel').classList.add('open');
+}
+function fermerOptim() {
+  document.getElementById('optimOverlay').classList.remove('open');
+  document.getElementById('optimPanel').classList.remove('open');
+}
+function selectChoice(groupId, labelEl, val) {
+  document.querySelectorAll(`#${groupId} .optim-choice`).forEach(c => c.classList.remove('selected'));
+  labelEl.classList.add('selected');
+}
+function reinitOptim() {
+  document.getElementById('optimResults').classList.remove('show');
+  document.getElementById('optimResults').innerHTML = '';
+  document.getElementById('optimRelancer').style.display = 'none';
+  document.getElementById('optimQuestions').style.display = 'block';
+}
+
+/* Calcule le cashflow net pour un régime donné avec les inputs courants */
+function calcRegime(r) {
+  const prix       = +v('prix');
+  const agence     = +v('agence');
+  const notaire    = prix * (+v('tauxNotaire') / 100);
+  const travaux    = +v('travaux');
+  const apport     = +v('apport');
+  const coutTotal  = prix + agence + notaire + travaux;
+  const capital    = Math.max(coutTotal - apport, 0);
+
+  const n = +document.getElementById('dureePret').value * 12;
+  const tauxNominal  = +v('tauxPret') / 100;
+  const tauxMensuel  = tauxNominal / 12;
+  const mensCredit   = pmt(tauxMensuel, n, capital);
+  const mensAssur    = capital * (+v('tauxAssurance') / 100) / 12;
+  const mensTotal    = mensCredit + mensAssur;
+  const mensAnnuelle = mensTotal * 12;
+
+  const loyerMens      = +v('loyer');
+  const vacPct         = +v('vacance') / 100;
+  const loyerAnnuelBrut = loyerMens * 12;
+  const loyerEffectif  = loyerAnnuelBrut * (1 - vacPct);
+
+  const chargesCopro = +v('chargesCopro');
+  const tf           = +v('tf');
+  const pno_v        = +v('pno');
+  const gestion      = loyerEffectif * (+v('gestion') / 100);
+  const entretien    = +v('entretien');
+  const chargesTotal = chargesCopro + tf + pno_v + gestion + entretien;
+
+  const tmi        = +document.getElementById('tmi').value / 100;
+  const pretSocial = 0.172;
+  const tauxGlobal = tmi + pretSocial;
+  const interetsAn1 = capital * tauxNominal;
+
+  let impots = 0;
+  let revenuImposable = 0;
+  let amortAnnuel = 0;
+
+  if (r === 'microfoncier') {
+    revenuImposable = loyerEffectif * 0.70;
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+  } else if (r === 'reelnu') {
+    revenuImposable = Math.max(loyerEffectif - chargesTotal - interetsAn1, 0);
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+  } else if (r === 'lmnpMicro') {
+    revenuImposable = loyerEffectif * 0.50;
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+  } else if (r === 'lmnpReel') {
+    const da = +document.getElementById('dureeAmort').value;
+    const amortBati = (prix * 0.80) / da;
+    const amortTrav = travaux / 10;
+    amortAnnuel = amortBati + amortTrav;
+    revenuImposable = Math.max(loyerEffectif - chargesTotal - interetsAn1 - amortAnnuel, 0);
+    impots = Math.max(revenuImposable * tauxGlobal, 0);
+  } else if (r === 'sciIs') {
+    const amortBati = (prix * 0.80) / 30;
+    const amortTrav = travaux / 10;
+    amortAnnuel = amortBati + amortTrav;
+    const res = loyerEffectif - chargesTotal - interetsAn1 - amortAnnuel - (mensAssur * 12);
+    if (res <= 0) impots = 0;
+    else if (res <= 42500) impots = res * 0.15;
+    else impots = 42500 * 0.15 + (res - 42500) * 0.25;
+    revenuImposable = Math.max(res, 0);
+  }
+
+  const cfAnnuel  = loyerEffectif - chargesTotal - mensAnnuelle - impots;
+  const cfMensuel = cfAnnuel / 12;
+  const rendNet   = coutTotal > 0 ? ((loyerEffectif - chargesTotal - impots) / coutTotal) * 100 : 0;
+
+  return { cfMensuel, cfAnnuel, impots, rendNet, amortAnnuel, mensTotal };
+}
+
+/* Labels et infos par régime */
+const regimeInfo = {
+  microfoncier: {
+    label: 'Micro-Foncier',
+    ico: '📄',
+    requis: ['nu'],
+    note: 'Abattement 30% sur loyers bruts. Simple mais peu optimisé si charges élevées. Accessible si loyers bruts < 15 000€/an.',
+    avantage: 'Simplicité fiscale maximale',
+  },
+  reelnu: {
+    label: 'Réel Nu',
+    ico: '🔍',
+    requis: ['nu'],
+    note: 'Déduction de toutes les charges réelles (intérêts, TF, PNO, travaux). Idéal si charges dépassent 30% des loyers.',
+    avantage: 'Déduction charges réelles complètes',
+  },
+  lmnpMicro: {
+    label: 'LMNP Micro-BIC',
+    ico: '🛋️',
+    requis: ['meuble'],
+    note: 'Abattement 50% sur les recettes. Meublé obligatoire. Simple et avantageux si charges inférieures à 50% des loyers.',
+    avantage: 'Abattement 50% — zéro comptabilité',
+  },
+  lmnpReel: {
+    label: 'LMNP Réel',
+    ico: '⚡',
+    requis: ['meuble'],
+    note: 'Charges + amortissements déductibles. Peut effacer toute fiscalité pendant des années. Le plus puissant sur le long terme.',
+    avantage: 'Amortissements = moins d\'impôts',
+  },
+  sciIs: {
+    label: 'SCI à l\'IS',
+    ico: '🏛️',
+    requis: ['nu', 'meuble'],
+    note: 'IS 15% jusqu\'à 42 500€. Amortissements déductibles. Attention : la revente génère une plus-value très fiscalisée. Mieux sur très long terme.',
+    avantage: 'IS 15% + amortissements',
+  },
+};
+
+function lancerOptimisation() {
+  // Lire les réponses
+  const objectif  = document.querySelector('input[name="objectif"]:checked')?.value || 'mixte';
+  const meuble    = document.querySelector('input[name="meuble"]:checked')?.value || 'oui';
+  const detention = document.querySelector('input[name="duree"]:checked')?.value || 'long';
+
+  // Calculer tous les régimes
+  const allRegimes = ['microfoncier','reelnu','lmnpMicro','lmnpReel','sciIs'];
+  const results = allRegimes.map(r => {
+    const eligible = determineEligibilite(r, meuble, detention);
+    const calc = eligible ? calcRegime(r) : null;
+    return { r, eligible, calc, info: regimeInfo[r] };
+  });
+
+  // Trier les éligibles par cashflow décroissant
+  const eligible = results.filter(x => x.eligible).sort((a,b) => b.calc.cfMensuel - a.calc.cfMensuel);
+  const ineligible = results.filter(x => !x.eligible);
+  const winner = eligible[0];
+
+  // Générer la recommandation
+  const reco = genererReco(winner, objectif, meuble, detention);
+
+  // Afficher
+  const container = document.getElementById('optimResults');
+  container.innerHTML = '';
+  container.classList.add('show');
+
+  // Box recommandation
+  container.innerHTML += `
+    <div class="optim-reco-box">
+      <h5>🏆 Recommandation personnalisée</h5>
+      <p>${reco}</p>
+    </div>`;
+
+  // Cartes régimes éligibles
+  eligible.forEach((item, idx) => {
+    const c = item.calc;
+    const isWinner = idx === 0;
+    const cfClass = c.cfMensuel >= 0 ? '' : ' neg';
+    container.innerHTML += `
+      <div class="optim-regime-card${isWinner ? ' winner' : ''}">
+        <div class="optim-regime-head">
+          <div class="optim-regime-name">
+            <span class="optim-rank-badge">${idx + 1}</span>
+            ${item.info.ico} ${item.info.label}
+            ${isWinner ? '<span style="font-size:.68rem;background:var(--vert);color:white;padding:.15rem .55rem;border-radius:50px;font-weight:700">Meilleur régime</span>' : ''}
+          </div>
+          <div class="optim-regime-cf${cfClass}">${fmtEur(c.cfMensuel)}/mois</div>
+        </div>
+        <div class="optim-regime-body">
+          <div class="optim-regime-kpis">
+            <div><div class="ok-lbl">CF annuel</div><div class="ok-val" style="color:${c.cfAnnuel>=0?'var(--vert-f)':'var(--rouge)'}">${fmtEur(c.cfAnnuel)}</div></div>
+            <div><div class="ok-lbl">Impôts/an</div><div class="ok-val">${fmtEur(c.impots)}</div></div>
+            <div><div class="ok-lbl">Rendement net</div><div class="ok-val">${c.rendNet.toFixed(1).replace('.',',')}%</div></div>
+          </div>
+          <div class="optim-regime-note">💡 ${item.info.avantage} · ${item.info.note}</div>
+          ${isWinner ? `<button class="btn-apply-regime" onclick="appliquerRegime('${item.r}')">✅ Appliquer ce régime au calculateur</button>` : ''}
+        </div>
+      </div>`;
+  });
+
+  // Régimes exclus
+  if (ineligible.length > 0) {
+    container.innerHTML += `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:.5rem">Régimes non compatibles avec votre profil</div>`;
+    ineligible.forEach(item => {
+      const raison = item.r === 'sciIs' && detention === 'court'
+        ? 'Court terme — plus-value très fiscalisée en SCI IS'
+        : meuble === 'non' && (item.r === 'lmnpMicro' || item.r === 'lmnpReel')
+          ? 'Exige la location meublée'
+          : '';
+      container.innerHTML += `
+        <div class="optim-regime-card excluded">
+          <div class="optim-regime-head">
+            <div class="optim-regime-name">
+              <span class="optim-rank-badge">—</span>
+              ${item.info.ico} ${item.info.label}
+            </div>
+            <div class="excluded-tag">Non compatible</div>
+          </div>
+          ${raison ? `<div style="padding:.5rem 1rem;font-size:.72rem;color:var(--rouge)">${raison}</div>` : ''}
+        </div>`;
+    });
+  }
+
+  // Masquer questions, afficher bouton relancer
+  document.getElementById('optimQuestions').style.display = 'none';
+  document.getElementById('optimRelancer').style.display = 'block';
+}
+
+function determineEligibilite(r, meuble, detention) {
+  if ((r === 'lmnpMicro' || r === 'lmnpReel') && meuble === 'non') return false;
+  if (r === 'sciIs' && detention === 'court') return false;
+  return true;
+}
+
+function genererReco(winner, objectif, meuble, detention) {
+  if (!winner) return "Aucun régime éligible avec ce profil. Vérifiez vos réponses.";
+  const r = winner.r;
+  const cf = winner.calc.cfMensuel;
+  const regLabel = `<strong>${regimeInfo[r].label}</strong>`;
+
+  let base = `Avec votre profil (${objectif === 'revenu' ? 'revenu complémentaire' : objectif === 'patrimoine' ? 'constitution de patrimoine' : 'équilibre revenu/patrimoine'}, location ${meuble === 'oui' ? 'meublée possible' : 'nue'}, détention ${detention === 'long' ? 'longue' : 'courte/moyenne'}), `;
+  let conseil = '';
+
+  if (r === 'lmnpReel') {
+    conseil = `${regLabel} est le grand gagnant. Les <strong>amortissements</strong> réduisent drastiquement votre base imposable — vous pouvez ne payer quasiment aucun impôt pendant 10 à 20 ans. C'est le régime le plus puissant sur le long terme pour maximiser le cashflow net.`;
+  } else if (r === 'lmnpMicro') {
+    conseil = `${regLabel} offre le meilleur équilibre simplicité/efficacité. L'abattement de 50% est très avantageux si vos charges réelles sont inférieures à 50% de vos loyers. Zéro comptabilité requise.`;
+  } else if (r === 'reelnu') {
+    conseil = `${regLabel} vous permet de déduire <strong>toutes vos charges réelles</strong> y compris les intérêts d'emprunt. Idéal quand les charges dépassent 30% des loyers. Un peu plus de comptabilité, mais la fiscalité est minimisée.`;
+  } else if (r === 'microfoncier') {
+    conseil = `${regLabel} est la solution la plus simple. Avec un abattement de 30%, elle convient bien si vos revenus locatifs sont inférieurs à 15 000€/an et vos charges réelles faibles.`;
+  } else if (r === 'sciIs') {
+    conseil = `${regLabel} est adaptée à votre stratégie patrimoniale longue. L'IS à 15% + les amortissements permettent une fiscalité réduite, mais <strong>anticipez la fiscalité à la revente</strong> (pas d'exonération plus-value comme en nom propre).`;
+  }
+
+  const cfTxt = cf >= 0
+    ? ` Ce régime vous dégage <strong>${fmtEur(cf)}/mois</strong> de cashflow positif.`
+    : ` Avec ce régime, l'effort d'épargne mensuel tombe à <strong>${fmtEur(cf)}/mois</strong>.`;
+
+  return base + conseil + cfTxt;
+}
+
+function appliquerRegime(r) {
+  const regimeToTab = { microfoncier: 0, reelnu: 1, lmnpMicro: 2, lmnpReel: 3, sciIs: 4 };
+  const tabs = document.querySelectorAll('.ftab');
+  const idx = regimeToTab[r];
+  if (idx !== undefined && tabs[idx]) {
+    setFiscal(r, tabs[idx]);
+    calculer();
+  }
+  fermerOptim();
+  // Scroll vers dashboard
+  setTimeout(() => {
+    const el = document.getElementById('resultSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 400);
+}
+
+/* ════════════════════════════════
+   ENTRETIEN AUTO SELON TYPE LOCATION
+═════════════════════════════════ */
+let entretienType = 'nue';
+const entretienPcts = { nue: 0.025, meublee: 0.04, courte: 0.06 };
+const entretienLabelsMap = {
+  nue:     '5% des loyers annuels effectifs — location nue (usure standard)',
+  meublee: '8% des loyers annuels effectifs — meublée (mobilier + équipements)',
+  courte:  '13% des loyers annuels effectifs — courte durée (turnover élevé)',
+};
+let entretienManuel = false; // devient true si l'utilisateur modifie la valeur
+
+function setEntretienType(type, el) {
+  entretienType = type;
+  document.querySelectorAll('.etab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  entretienManuel = false; // reset sur changement de type
+  updateEntretienAuto();
+  calculer();
+}
+
+function updateEntretienAuto() {
+  const loyer    = +v('loyer') || 0;
+  const vacance  = +v('vacance') / 100;
+  const loyerEff = loyer * 12 * (1 - vacance);
+  const pct      = entretienPcts[entretienType];
+  const val      = Math.round(loyerEff * pct / 10) * 10; // arrondi 10€
+  if (!entretienManuel) {
+    document.getElementById('entretien').value = val;
+  }
+  const tag = document.getElementById('entretienAutoTag');
+  const det = document.getElementById('entretienDetail');
+  if (!entretienManuel) {
+    tag.textContent = 'Auto ✓';
+    tag.style.background = 'var(--vert-xl)';
+    tag.style.color = 'var(--vert-f)';
+  } else {
+    tag.textContent = 'Perso ✎';
+    tag.style.background = 'var(--bleu-xl)';
+    tag.style.color = 'var(--bleu-f)';
+  }
+  det.textContent = entretienLabelsMap[entretienType] + (entretienManuel ? '' : ` → ${val.toLocaleString('fr-FR')} €/an calculé`);
+}
+
+/* Détection saisie manuelle du champ entretien */
+document.getElementById('entretien').addEventListener('input', function() {
+  entretienManuel = true;
+  updateEntretienAuto();
+  calculer();
+});
+
+/* Synchro auto entretien quand loyer/vacance changent */
+['loyer','vacance'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    if (!entretienManuel) updateEntretienAuto();
+  });
+});
+
+/* ── Init ── */
+document.getElementById('dureeAmortField').style.display = 'none';
+initAutoCalc();
+// initCharts() est appelé lazily dans calculer() après que le container est visible
+updateEntretienAuto();
+setTimeout(calculer, 50);
+</script>
+
+</body>
+</html>
