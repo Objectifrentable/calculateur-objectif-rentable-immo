@@ -103,9 +103,16 @@ button[type="submit"]:active{transform:translateY(0)}
     <li>100% hors connexion — aucune installation</li>
   </ul>
 
-  <!-- Formulaire -->
+  <!-- Iframe caché — reçoit la réponse Systeme.io -->
+  <iframe name="systeme-target" style="display:none;" aria-hidden="true"></iframe>
+
+  <!-- Formulaire soumis directement vers Systeme.io -->
   <p class="form-title">Où envoyer votre calculateur ?</p>
-  <form id="capture-form">
+  <form id="capture-form"
+        action="https://gestionlocation-immo68.systeme.io/ee33f765"
+        method="POST"
+        target="systeme-target"
+        accept-charset="UTF-8">
     <input type="text"  id="prenom" name="contact[first_name]" placeholder="Votre prénom" required autocomplete="given-name">
     <input type="email" id="email"  name="contact[email]"      placeholder="Votre adresse email" required autocomplete="email">
     <button type="submit" id="btn-submit">📥 Recevoir le calculateur gratuit →</button>
@@ -113,28 +120,14 @@ button[type="submit"]:active{transform:translateY(0)}
   </form>
 
 <script>
-document.getElementById('capture-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-
+document.getElementById('capture-form').addEventListener('submit', function() {
   var btn = document.getElementById('btn-submit');
   btn.textContent = '⏳ Envoi en cours…';
   btn.disabled = true;
-
-  var formData = new FormData();
-  formData.append('contact[first_name]', document.getElementById('prenom').value);
-  formData.append('contact[email]',      document.getElementById('email').value);
-
-  fetch('https://gestionlocation-immo68.systeme.io/ee33f765', {
-    method: 'POST',
-    mode: 'no-cors',
-    body: formData
-  })
-  .then(function() {
+  // Laisse 800ms à Systeme.io pour recevoir les données, puis redirige
+  setTimeout(function() {
     window.location.href = 'merci.html';
-  })
-  .catch(function() {
-    window.location.href = 'merci.html';
-  });
+  }, 800);
 });
 </script>
 
