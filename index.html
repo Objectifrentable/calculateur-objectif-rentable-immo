@@ -3,507 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculateur de Rentabilité Gratuit — Objectif Rentable</title>
-<meta name="description" content="Télécharge gratuitement le calculateur de rentabilité locative. Analyse 5 régimes fiscaux en quelques secondes. Spécialement conçu pour les salariés CDI.">
-
-<!--
-  ╔══════════════════════════════════════════════════════════════════╗
-  ║  CHECKLIST AVANT MISE EN LIGNE                                  ║
-  ║                                                                  ║
-  ║  1. Dans Systeme.io :                                           ║
-  ║     → Crée un tunnel avec une étape "Optin"                     ║
-  ║     → Dans les paramètres de l'étape, mets l'URL de redirect :  ║
-  ║       https://TON-USERNAME.github.io/objectif-rentable/merci.html ║
-  ║     → Récupère l'URL du formulaire (ex: .../calculateur-gratuit) ║
-  ║                                                                  ║
-  ║  2. Dans ce fichier :                                           ║
-  ║     → Remplace l'URL du <form action="..."> si elle a changé    ║
-  ║                                                                  ║
-  ║  3. Tes 3 fichiers GitHub :                                     ║
-  ║     → page-capture.html  → renommer en index.html               ║
-  ║     → merci.html         → garder tel quel                      ║
-  ║     → calculateur-objectif-rentable.html → garder tel quel      ║
-  ╚══════════════════════════════════════════════════════════════════╝
--->
-
+<title>Calculateur de rentabilité GRATUIT — Objectif Rentable</title>
+<meta name="description" content="Comparez les 5 régimes fiscaux et calculez votre cashflow net en 2 minutes. Gratuit, sans inscription, fonctionne hors connexion.">
 <style>
-/* ── RESET & BASE ── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background: #0a0f0b;
-  color: #f0fdf4;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-:root {
-  --vert:    #1fa04a;
-  --vert-f:  #156e33;
-  --vert-l:  #4ade80;
-  --vert-xl: rgba(31,160,74,.12);
-  --bleu:    #1678b4;
-  --bleu-l:  #38bdf8;
-  --gris:    rgba(255,255,255,.55);
-  --border:  rgba(255,255,255,.1);
-  --card:    rgba(255,255,255,.04);
-}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--vert:#1fa04a;--bleu:#1678b4;--dark:#0f1f3d;--gris:#6b7280}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#f0fdf4;color:#111827;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
 
-/* ── HEADER ── */
-.top-bar {
-  padding: 1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: rgba(0,0,0,.3);
-  backdrop-filter: blur(8px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.logo-row { display: flex; align-items: center; gap: .7rem; }
-.logo-svg { flex-shrink: 0; }
-.logo-name { font-size: .95rem; font-weight: 800; color: #fff; letter-spacing: -.01em; }
-.logo-sub {
-  font-size: .58rem; font-weight: 500; color: var(--gris);
-  letter-spacing: .06em; text-transform: uppercase; display: block;
-}
-.top-bar-badge {
-  background: var(--vert-xl);
-  border: 1px solid rgba(74,222,128,.3);
-  color: var(--vert-l);
-  font-size: .7rem; font-weight: 700;
-  padding: .3rem .8rem; border-radius: 50px; letter-spacing: .04em;
-}
+/* CARD PRINCIPALE */
+.card{background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(31,160,74,.15),0 2px 8px rgba(0,0,0,.06);max-width:520px;width:100%;padding:2.5rem 2rem 2rem;text-align:center}
 
-/* ── HERO ── */
-.hero {
-  max-width: 800px; margin: 0 auto;
-  padding: 4rem 1.5rem 2rem; text-align: center;
-}
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: .5rem;
-  background: var(--vert-xl); border: 1px solid rgba(74,222,128,.25);
-  color: var(--vert-l); font-size: .72rem; font-weight: 700;
-  padding: .35rem .9rem; border-radius: 50px;
-  letter-spacing: .05em; text-transform: uppercase; margin-bottom: 1.4rem;
-}
-.hero-title {
-  font-size: clamp(1.7rem, 5vw, 2.8rem); font-weight: 800;
-  line-height: 1.18; letter-spacing: -.03em; color: #fff; margin-bottom: .9rem;
-}
-.hero-title .accent { color: var(--vert-l); }
-.hero-sub {
-  font-size: clamp(.9rem, 2.5vw, 1.05rem); color: var(--gris);
-  max-width: 560px; margin: 0 auto 2rem; line-height: 1.65;
-}
+/* LOGO */
+.logo{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:1.5rem}
+.logo-icon{width:42px;height:42px}
+.logo-text{font-size:1.15rem;font-weight:800;color:var(--dark);line-height:1.1}
+.logo-text span{color:var(--vert)}
 
-/* ── PREVIEW MOCKUP ── */
-.preview-card {
-  background: linear-gradient(135deg, #0f1f14 0%, #0d1a20 100%);
-  border: 1px solid rgba(74,222,128,.2); border-radius: 16px;
-  padding: 1.5rem; margin: 0 auto 2.5rem; max-width: 680px;
-  box-shadow: 0 0 60px rgba(31,160,74,.1), 0 20px 60px rgba(0,0,0,.5);
-  position: relative; overflow: hidden;
-}
-.preview-title {
-  font-size: .65rem; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: rgba(74,222,128,.6); margin-bottom: 1rem;
-}
-.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.preview-regime {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
-  border-radius: 8px; padding: 8px 6px; text-align: center;
-}
-.pr-label {
-  font-size: 7px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .04em; color: rgba(255,255,255,.4); margin-bottom: 4px;
-}
-.pr-value { font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.pr-value.pos { color: #4ade80; }
-.pr-value.neg { color: #f87171; }
-.preview-bar-wrap {
-  height: 40px; position: relative; display: flex;
-  align-items: flex-end; justify-content: center;
-  margin-top: 4px; border-top: 1px solid rgba(255,255,255,.06); padding-top: 4px;
-}
-.preview-bar { width: 60%; border-radius: 3px 3px 0 0; }
-.preview-bar.pos { background: linear-gradient(to top, #15803d, #4ade80); }
-.preview-bar.neg { background: linear-gradient(to bottom, #991b1b, #f87171); border-radius: 0 0 3px 3px; align-self: flex-start; }
-.preview-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
-.pk { background: rgba(255,255,255,.04); border-radius: 6px; padding: 6px 8px; text-align: left; }
-.pk-l { font-size: 7px; text-transform: uppercase; letter-spacing: .04em; color: rgba(255,255,255,.35); }
-.pk-v { font-size: 11px; font-weight: 800; color: #fff; margin-top: 2px; }
+/* BADGE */
+.badge{display:inline-block;background:#dcfce7;color:var(--vert);font-size:.8rem;font-weight:700;padding:.35rem .9rem;border-radius:99px;margin-bottom:1.2rem;letter-spacing:.04em}
 
-/* ── FORMULAIRE ── */
-.form-section { max-width: 520px; margin: 0 auto; padding: 0 1.5rem 3rem; }
-.form-card {
-  background: rgba(255,255,255,.05); border: 1px solid rgba(74,222,128,.25);
-  border-radius: 20px; padding: 2rem;
-  box-shadow: 0 0 40px rgba(31,160,74,.08); position: relative; overflow: hidden;
-}
-.form-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--vert), var(--bleu), var(--vert-l));
-}
-.form-headline {
-  font-size: 1.15rem; font-weight: 800; color: #fff;
-  text-align: center; margin-bottom: .4rem; letter-spacing: -.01em;
-}
-.form-sub { font-size: .82rem; color: var(--gris); text-align: center; margin-bottom: 1.5rem; line-height: 1.5; }
-.form-group { margin-bottom: .9rem; }
-.form-group label {
-  display: block; font-size: .7rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .07em; color: rgba(255,255,255,.5); margin-bottom: .35rem;
-}
-.form-input {
-  width: 100%; padding: .85rem 1.1rem;
-  background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.12);
-  border-radius: 10px; color: #fff; font-size: 16px; /* 16px évite le zoom iOS */
-  font-family: inherit; outline: none; transition: border-color .2s, background .2s;
-  -webkit-appearance: none;
-}
-.form-input::placeholder { color: rgba(255,255,255,.25); }
-.form-input:focus {
-  border-color: var(--vert); background: rgba(31,160,74,.08);
-  box-shadow: 0 0 0 3px rgba(31,160,74,.15);
-}
-.btn-submit {
-  width: 100%; padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, var(--vert) 0%, #15803d 100%);
-  color: white; border: none; border-radius: 12px; font-size: 1rem;
-  font-weight: 800; font-family: inherit; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: .6rem;
-  letter-spacing: .01em; box-shadow: 0 4px 20px rgba(31,160,74,.4);
-  transition: transform .15s, box-shadow .15s; margin-top: .3rem;
-}
-.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(31,160,74,.5); }
-.btn-submit:active { transform: translateY(0); }
-.form-privacy { font-size: .7rem; color: rgba(255,255,255,.3); text-align: center; margin-top: .9rem; line-height: 1.5; }
+/* TITRE */
+h1{font-size:1.7rem;font-weight:800;color:var(--dark);line-height:1.25;margin-bottom:.7rem}
+h1 em{color:var(--vert);font-style:normal}
+.subtitle{font-size:1rem;color:var(--gris);margin-bottom:1.6rem;line-height:1.5}
 
-/* ── BÉNÉFICES ── */
-.benefits {
-  max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
-}
-.benefit-item {
-  display: flex; align-items: flex-start; gap: .75rem;
-  padding: 1rem 1.1rem; background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; transition: border-color .2s;
-}
-.benefit-item:hover { border-color: rgba(74,222,128,.3); }
-.benefit-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: .1rem; }
-.benefit-text h4 { font-size: .85rem; font-weight: 700; color: #fff; margin-bottom: .2rem; }
-.benefit-text p { font-size: .75rem; color: var(--gris); line-height: 1.5; }
+/* APERÇU CALCULATEUR */
+.preview{background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.6rem;text-align:left}
+.preview-title{font-size:.75rem;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.7rem}
+.regimes{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.regime{display:flex;justify-content:space-between;align-items:center;padding:.35rem .7rem;border-radius:8px;font-size:.82rem}
+.regime.neg{background:#fee2e2;color:#dc2626}
+.regime.pos{background:#dcfce7;color:var(--vert);font-weight:700}
+.regime-name{font-weight:600}
+.regime-val{font-weight:700}
 
-/* ── RÉGIMES ── */
-.regimes-section { max-width: 800px; margin: 0 auto; padding: 0 1.5rem 3rem; }
-.section-label-small {
-  font-size: .65rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .12em; color: rgba(74,222,128,.6); text-align: center; margin-bottom: .6rem;
-}
-.section-title-center {
-  font-size: clamp(1.1rem, 3vw, 1.5rem); font-weight: 800; color: #fff;
-  text-align: center; margin-bottom: 1.5rem; letter-spacing: -.02em;
-}
-.regimes-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.regime-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-  padding: .85rem .75rem; text-align: center; transition: border-color .2s, transform .15s;
-}
-.regime-card:hover { border-color: rgba(74,222,128,.4); transform: translateY(-2px); }
-.rc-icon { font-size: 1.2rem; margin-bottom: .3rem; }
-.rc-name { font-size: .68rem; font-weight: 800; color: #fff; margin-bottom: .2rem; line-height: 1.3; }
-.rc-desc { font-size: .6rem; color: var(--gris); line-height: 1.4; }
+/* POINTS DE VALEUR */
+.perks{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.8rem;text-align:left}
+.perks li{display:flex;align-items:center;gap:.6rem;font-size:.92rem;color:#374151}
+.perks li::before{content:"✓";min-width:20px;height:20px;background:var(--vert);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
 
-/* ── SOCIAL PROOF ── */
-.social-proof { max-width: 680px; margin: 0 auto; padding: 0 1.5rem 3rem; }
-.sp-inner {
-  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-  padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
-}
-.sp-avatars { display: flex; }
-.sp-av {
-  width: 38px; height: 38px; border-radius: 50%; border: 2px solid #0a0f0b;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .9rem; font-weight: 700; flex-shrink: 0;
-}
-.sp-av:not(:first-child) { margin-left: -10px; }
-.sp-text { flex: 1; min-width: 160px; }
-.sp-text strong { display: block; font-size: .88rem; color: #fff; margin-bottom: .2rem; }
-.sp-text span { font-size: .75rem; color: var(--gris); }
-.sp-stars { color: #facc15; letter-spacing: .05em; }
+/* FORMULAIRE */
+.form-title{font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:1rem}
+form{display:flex;flex-direction:column;gap:.75rem}
+input[type="text"],input[type="email"]{width:100%;padding:.85rem 1rem;border:2px solid #e5e7eb;border-radius:12px;font-size:1rem;color:#111827;outline:none;transition:border-color .2s}
+input[type="text"]:focus,input[type="email"]:focus{border-color:var(--vert)}
+input::placeholder{color:#9ca3af}
+button[type="submit"]{width:100%;padding:1rem;background:var(--vert);color:#fff;font-size:1.05rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(31,160,74,.4)}
+button[type="submit"]:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(31,160,74,.5)}
+button[type="submit"]:active{transform:translateY(0)}
+.privacy{font-size:.75rem;color:#9ca3af;margin-top:.4rem}
+.privacy a{color:var(--gris);text-decoration:underline}
 
-/* ── ABOUT ── */
-.about-section { max-width: 600px; margin: 0 auto; padding: 0 1.5rem 3rem; }
-.about-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-  padding: 1.5rem; display: flex; align-items: flex-start; gap: 1.2rem; flex-wrap: wrap;
-}
-.about-avatar {
-  width: 56px; height: 56px; background: rgba(31,160,74,.15);
-  border: 2px solid rgba(74,222,128,.25); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;
-}
-.about-name { font-size: .95rem; font-weight: 800; color: #fff; margin-bottom: .1rem; }
-.about-role { font-size: .72rem; color: var(--vert-l); font-weight: 600; margin-bottom: .6rem; letter-spacing: .02em; }
-.about-bio { font-size: .8rem; color: var(--gris); line-height: 1.6; }
-
-/* ── FOOTER ── */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 1.5rem 1.5rem 2rem; text-align: center;
-}
-.footer-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: .75rem; }
-.footer-links a { font-size: .78rem; color: var(--gris); text-decoration: none; transition: color .2s; }
-.footer-links a:hover { color: var(--vert-l); }
-.footer-copy { font-size: .68rem; color: rgba(255,255,255,.2); }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 640px) {
-  .benefits { grid-template-columns: 1fr; padding: 1.5rem 1rem; }
-  .regimes-grid { grid-template-columns: repeat(2, 1fr); }
-  .preview-grid { grid-template-columns: repeat(3, 1fr); }
-  .preview-kpis { grid-template-columns: repeat(2, 1fr); }
-  .about-card { flex-direction: column; }
-  .top-bar-badge { display: none; }
-  .hero { padding: 2.5rem 1rem 1.5rem; }
-}
-@media (max-width: 420px) {
-  .form-card { padding: 1.5rem 1rem; }
-  .preview-grid { grid-template-columns: repeat(2, 1fr); }
-  .regimes-grid { grid-template-columns: 1fr; }
+@media(max-width:480px){
+  h1{font-size:1.45rem}
+  .card{padding:2rem 1.3rem 1.5rem}
+  .regimes{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
+<div class="card">
 
-<!-- ── HEADER ── -->
-<header class="top-bar">
-  <div class="logo-row">
-    <svg class="logo-svg" width="30" height="26" viewBox="0 0 88 76" fill="none">
-      <path d="M0 38 L20 10 L32 10 L32 38 L20 66 Z" fill="#0288d1"/>
-      <rect x="36" y="44" width="12" height="22" rx="2" fill="#4caf50"/>
-      <rect x="52" y="28" width="12" height="38" rx="2" fill="#43a047"/>
-      <rect x="68" y="10" width="12" height="56" rx="2" fill="#66bb6a"/>
-      <polygon points="74,4 68,14 80,14" fill="#1a7a3a"/>
+  <!-- Logo -->
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="6,52 6,30 18,30 18,52" fill="#1fa04a"/>
+      <polygon points="22,52 22,20 34,20 34,52" fill="#1fa04a" opacity=".85"/>
+      <polygon points="38,52 38,10 50,10 50,52" fill="#1fa04a" opacity=".7"/>
+      <polygon points="54,52 54,4 64,14 54,24" fill="#1fa04a"/>
+      <path d="M2,56 L18,38 L32,46 L50,24 L62,30" stroke="#1678b4" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <div>
-      <div class="logo-name">Objectif Rentable</div>
-      <span class="logo-sub">Investissement locatif · Salariés CDI</span>
-    </div>
+    <div class="logo-text">OBJECTIF<br><span>RENTABLE</span></div>
   </div>
-  <div class="top-bar-badge">🎁 100% Gratuit</div>
-</header>
 
-<!-- ── HERO ── -->
-<section class="hero">
-  <div class="hero-eyebrow">🎁 Outil gratuit pour salariés investisseurs</div>
-  <h1 class="hero-title">
-    Trouve le <span class="accent">meilleur régime fiscal</span><br>
-    pour ton investissement locatif
-  </h1>
-  <p class="hero-sub">
-    Rentre les chiffres de ton bien, le calculateur compare instantanément
-    <strong style="color:#fff">5 régimes fiscaux</strong> et t'affiche ton cashflow net mensuel pour chacun.
-    Ce que font les comptables à 300€ la séance — en 2 minutes, gratuitement.
-  </p>
+  <!-- Badge -->
+  <span class="badge">🎁 CALCULATEUR GRATUIT</span>
 
-  <!-- APERÇU DU CALCULATEUR -->
-  <div class="preview-card">
-    <div class="preview-title">📊 Aperçu — Comparatif cashflow mensuel (5 régimes fiscaux)</div>
-    <div class="preview-grid">
-      <div class="preview-regime">
-        <div class="pr-label">Micro-Foncier</div>
-        <div class="pr-value neg">−124€</div>
-        <div class="preview-bar-wrap"><div class="preview-bar neg" style="height:22px;"></div></div>
-      </div>
-      <div class="preview-regime">
-        <div class="pr-label">Réel Nu</div>
-        <div class="pr-value neg">−67€</div>
-        <div class="preview-bar-wrap"><div class="preview-bar neg" style="height:12px;"></div></div>
-      </div>
-      <div class="preview-regime">
-        <div class="pr-label">LMNP Micro</div>
-        <div class="pr-value pos">+38€</div>
-        <div class="preview-bar-wrap"><div class="preview-bar pos" style="height:18px;"></div></div>
-      </div>
-      <div class="preview-regime">
-        <div class="pr-label">LMNP Réel</div>
-        <div class="pr-value pos">+142€</div>
-        <div class="preview-bar-wrap"><div class="preview-bar pos" style="height:35px;"></div></div>
-      </div>
-      <div class="preview-regime">
-        <div class="pr-label">SCI IS</div>
-        <div class="pr-value pos">+89€</div>
-        <div class="preview-bar-wrap"><div class="preview-bar pos" style="height:26px;"></div></div>
-      </div>
-    </div>
-    <div class="preview-kpis">
-      <div class="pk"><div class="pk-l">Prix achat</div><div class="pk-v">180 000€</div></div>
-      <div class="pk"><div class="pk-l">Loyer HC</div><div class="pk-v">750€/mois</div></div>
-      <div class="pk"><div class="pk-l">Crédit</div><div class="pk-v">20 ans · 3,8%</div></div>
-      <div class="pk"><div class="pk-l">Rendement</div><div class="pk-v">5,0% brut</div></div>
-    </div>
-  </div>
-</section>
+  <!-- Titre -->
+  <h1>Calculez votre <em>vrai cashflow</em><br>après impôts en 2 minutes</h1>
+  <p class="subtitle">Compare les 5 régimes fiscaux sur votre projet — hors connexion, sans inscription.</p>
 
-<!-- ── BÉNÉFICES ── -->
-<div class="benefits">
-  <div class="benefit-item">
-    <div class="benefit-icon">⚡</div>
-    <div class="benefit-text">
-      <h4>Résultat instantané</h4>
-      <p>Saisis tes chiffres, les 5 graphiques se mettent à jour en temps réel. Aucune formule à saisir.</p>
+  <!-- Aperçu résultats -->
+  <div class="preview">
+    <div class="preview-title">📊 Exemple T2 à 120 000 € — loyer 620 €/mois</div>
+    <div class="regimes">
+      <div class="regime neg"><span class="regime-name">Micro-Foncier</span><span class="regime-val">-38 €</span></div>
+      <div class="regime neg"><span class="regime-name">Réel Nu</span><span class="regime-val">+85 €</span></div>
+      <div class="regime neg"><span class="regime-name">LMNP Micro-BIC</span><span class="regime-val">+42 €</span></div>
+      <div class="regime pos"><span class="regime-name">⭐ LMNP Réel</span><span class="regime-val">+214 €</span></div>
+      <div class="regime pos" style="grid-column:span 1"><span class="regime-name">SCI IS</span><span class="regime-val">+160 €</span></div>
     </div>
   </div>
-  <div class="benefit-item">
-    <div class="benefit-icon">🔒</div>
-    <div class="benefit-text">
-      <h4>100% hors ligne</h4>
-      <p>Le fichier fonctionne sans internet une fois téléchargé. Tes données restent sur ton ordinateur.</p>
-    </div>
-  </div>
-  <div class="benefit-item">
-    <div class="benefit-icon">🎯</div>
-    <div class="benefit-text">
-      <h4>Zéro prise de tête</h4>
-      <p>Conçu pour les salariés CDI qui découvrent l'investissement locatif. Langage simple, résultats clairs.</p>
-    </div>
-  </div>
+
+  <!-- Perks -->
+  <ul class="perks">
+    <li>5 régimes fiscaux comparés en temps réel</li>
+    <li>Cashflow net après crédit, charges et impôts</li>
+    <li>Mis à jour avec la fiscalité 2025-2026</li>
+    <li>100% hors connexion — aucune installation</li>
+  </ul>
+
+  <!-- Formulaire -->
+  <p class="form-title">Où envoyer votre calculateur ?</p>
+  <form id="capture-form">
+    <input type="text"  id="prenom" name="contact[first_name]" placeholder="Votre prénom" required autocomplete="given-name">
+    <input type="email" id="email"  name="contact[email]"      placeholder="Votre adresse email" required autocomplete="email">
+    <button type="submit" id="btn-submit">📥 Recevoir le calculateur gratuit →</button>
+    <p class="privacy">🔒 Aucun spam. Désinscription en 1 clic.</p>
+  </form>
+
+<script>
+document.getElementById('capture-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var btn = document.getElementById('btn-submit');
+  btn.textContent = '⏳ Envoi en cours…';
+  btn.disabled = true;
+
+  var formData = new FormData();
+  formData.append('contact[first_name]', document.getElementById('prenom').value);
+  formData.append('contact[email]',      document.getElementById('email').value);
+
+  fetch('https://gestionlocation-immo68.systeme.io/ee33f765', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function() {
+    window.location.href = 'merci.html';
+  })
+  .catch(function() {
+    // En cas d'erreur réseau, on redirige quand même
+    window.location.href = 'merci.html';
+  });
+});
+</script>
+
 </div>
-
-<!-- ── FORMULAIRE ── -->
-<section class="form-section">
-  <div class="form-card">
-    <div class="form-headline">📥 Reçois ton calculateur gratuit</div>
-    <p class="form-sub">Entre ton prénom et ton email — le lien de téléchargement t'est envoyé immédiatement.</p>
-
-    <!--
-      IMPORTANT :
-      - L'URL du <form action> doit correspondre à ton tunnel Systeme.io
-      - Dans Systeme.io, configure la page de redirect vers : merci.html
-      - Le funnel_id et step_id sont optionnels (Systeme.io les gère automatiquement
-        si tu postes directement sur l'URL du tunnel)
-    -->
-    <form
-      action="https://gestionlocation-immo68.systeme.io/92f39ba8"
-      method="POST"
-      accept-charset="UTF-8"
-    >
-      <div class="form-group">
-        <label for="first_name">Prénom</label>
-        <input
-          type="text"
-          id="first_name"
-          name="contact[first_name]"
-          class="form-input"
-          placeholder="Ton prénom"
-          required
-          autocomplete="given-name"
-        >
-      </div>
-      <div class="form-group">
-        <label for="email">Adresse email</label>
-        <input
-          type="email"
-          id="email"
-          name="contact[email]"
-          class="form-input"
-          placeholder="ton@email.com"
-          required
-          autocomplete="email"
-        >
-      </div>
-
-      <button type="submit" class="btn-submit">
-        ⬇️ Télécharger le calculateur gratuitement
-      </button>
-    </form>
-
-    <p class="form-privacy">🔒 Ton email est en sécurité. Zéro spam. Désabonnement en 1 clic.</p>
-  </div>
-</section>
-
-<!-- ── 5 RÉGIMES ── -->
-<section class="regimes-section">
-  <p class="section-label-small">Ce que le calculateur analyse</p>
-  <h2 class="section-title-center">5 régimes fiscaux comparés en temps réel</h2>
-  <div class="regimes-grid">
-    <div class="regime-card">
-      <div class="rc-icon">📄</div>
-      <div class="rc-name">Micro-Foncier</div>
-      <div class="rc-desc">Abattement 30% · Location nue · Simple</div>
-    </div>
-    <div class="regime-card">
-      <div class="rc-icon">🔍</div>
-      <div class="rc-name">Réel Nu</div>
-      <div class="rc-desc">Déduction charges réelles · Intérêts déductibles</div>
-    </div>
-    <div class="regime-card">
-      <div class="rc-icon">🛋️</div>
-      <div class="rc-name">LMNP Micro-BIC</div>
-      <div class="rc-desc">Abattement 50% · Location meublée</div>
-    </div>
-    <div class="regime-card">
-      <div class="rc-icon">⚡</div>
-      <div class="rc-name">LMNP Réel</div>
-      <div class="rc-desc">Amortissements · Fiscalité quasi nulle</div>
-    </div>
-    <div class="regime-card">
-      <div class="rc-icon">🏛️</div>
-      <div class="rc-name">SCI à l'IS</div>
-      <div class="rc-desc">IS 15% · Société · Long terme</div>
-    </div>
-  </div>
-</section>
-
-<!-- ── SOCIAL PROOF ── -->
-<div class="social-proof">
-  <div class="sp-inner">
-    <div class="sp-avatars">
-      <div class="sp-av" style="background:#1678b4">T</div>
-      <div class="sp-av" style="background:#1fa04a">M</div>
-      <div class="sp-av" style="background:#7c3aed">S</div>
-      <div class="sp-av" style="background:#ea580c">A</div>
-    </div>
-    <div class="sp-text">
-      <strong>+120 salariés l'utilisent déjà</strong>
-      <span>
-        <span class="sp-stars">★★★★★</span>
-        "Enfin un outil qui compare tous les régimes fiscaux d'un coup"
-      </span>
-    </div>
-  </div>
-</div>
-
-<!-- ── À PROPOS ── -->
-<section class="about-section">
-  <div class="about-card">
-    <div class="about-avatar">👨‍💼</div>
-    <div>
-      <div class="about-name">David Henry</div>
-      <div class="about-role">Fondateur — Objectif Rentable</div>
-      <p class="about-bio">
-        Salarié CDI passionné par l'immobilier, j'ai créé ce calculateur
-        pour aider les salariés comme moi à analyser un investissement locatif
-        <strong style="color:#fff">sans se tromper de régime fiscal</strong>.
-        Ce que les comptables facturent 300€, tu l'as ici gratuitement en 2 minutes.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="footer-links">
-    <a href="https://www.linkedin.com/in/david-henry67" target="_blank" rel="noopener">💼 LinkedIn</a>
-    <a href="https://calendly.com/david-coachingimmo/45min" target="_blank" rel="noopener">📞 Coaching gratuit 45 min</a>
-    <a href="mailto:david.coachingimmo@gmail.com">✉️ Contact</a>
-  </div>
-  <p class="footer-copy">© 2026 Objectif Rentable · Tous droits réservés</p>
-</footer>
-
 </body>
 </html>
